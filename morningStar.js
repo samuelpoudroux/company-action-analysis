@@ -6,6 +6,9 @@ const {
   acceptCookies,
   getRatioKeys,
   getActionPrice,
+  getIncomeStatement,
+  getBalanceSheet,
+  getCashFlow,
 } = require('./services');
 // const nodemailer = require('nodemailer');
 // require('dotenv').config();
@@ -15,11 +18,24 @@ const {
   await acceptCookies(page);
   await searchActionByName(page, 'air liquide');
   const name = await getActionName(page);
-  console.log("Le nom de l'action est " + name);
   const price = await getActionPrice(page);
-  console.log('Le prix est de ' + price);
-  const ratioKeys = await getRatioKeys(page);
-  console.log(JSON.stringify(radioKeys))
-  debugger;
-  // await browser.close();
+  const incomeStatement = await getIncomeStatement(page);
+  const balanceSheet = await getBalanceSheet(page);
+  const cashFlow = await getCashFlow(page);
+  console.log(
+    JSON.stringify({
+      name,
+      price,
+      incomeStatement,
+      balanceSheet,
+      cashFlow,
+    })
+  );
+  return {
+    name,
+    price,
+    incomeStatement,
+    balanceSheet,
+    cashFlow,
+  };
 })();

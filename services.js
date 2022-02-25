@@ -1,6 +1,12 @@
 const puppeteer = require('puppeteer');
 const _ = require('lodash');
 
+const removeItemOfArray = (array, element) => {
+  const index = array.findIndex((e) => e === element);
+  // remove useless title
+  array.splice(index, 1);
+};
+
 async function goToPage(url) {
   const browser = await puppeteer.launch({ headless: false });
   const page = await browser.newPage();
@@ -21,6 +27,53 @@ async function acceptCookies(page) {
   if (existingIndividualInput) {
     return page.click('#btn_individual');
   }
+}
+
+async function getTableData(page, tabLink) {
+  await page.waitForSelector(`#${tabLink}`, {
+    visible: true,
+  });
+
+  const tab = await page.$(`#${tabLink}`);
+  await page.evaluate((el) => el.click(), tab);
+
+  await page.waitForSelector('table.years5', {
+    visible: true,
+  });
+
+  const years = await page.$$eval('table.years5 > thead > tr > th', (ths) => {
+    return ths.map((th) => th.textContent);
+  });
+
+  const treatedYears = _.uniq(years);
+  treatedYears.shift();
+  years.shift();
+
+  const dataThs = await page.$$eval('table.years5 tbody th[headers]', (tds) => {
+    return tds.map((td) => td.textContent);
+  });
+
+  const dataTds = await page.$$eval('table.years5 tbody td', (tds) => {
+    return tds.map((td) => td.textContent);
+  });
+
+  const dataByTableRow = _.chunk(dataTds, treatedYears.length);
+
+  let finalData = {
+    years: treatedYears,
+  };
+
+  dataThs
+    .map((e) =>
+      _.startCase(e)
+        .normalize('NFD')
+        .replace(/([\u0300-\u036f]|[^0-9a-zA-Z])/g, '')
+    )
+    .forEach((key, index) => {
+      finalData[key] = dataByTableRow[index];
+    });
+
+  return finalData;
 }
 
 async function closePage() {
@@ -96,7 +149,7 @@ async function getGrowthRates(page) {
   };
 }
 
-async function getCashFlow(page) {
+async function getCashFlowRatio(page) {
   await page.waitForSelector('#LnkPage11Viewcf', {
     visible: true,
   });
@@ -191,7 +244,7 @@ async function getProfit(page) {
   const profitData = await page.$$eval('table.years5 tbody td', (tds) => {
     return tds.map((td) => td.textContent);
   });
-  
+
   const profitDataByTableRow = _.chunk(profitData, treatedYears.length);
 
   return {
@@ -206,20 +259,32 @@ async function getProfit(page) {
   };
 }
 
+async function getIncomeStatement(page) {
+  return getTableData(page, 'LnkPage10');
+}
+
+async function getBalanceSheet(page) {
+  return getTableData(page, 'LnkPage10Viewbs');
+}
+
+async function getCashFlow(page) {
+  return getTableData(page, 'LnkPage10Viewcf');
+}
+
 async function getRatioKeys(page) {
   await page.waitForSelector('#LnkPage11', {
     visible: true,
   });
   await page.click('#LnkPage11');
   const growRates = await getGrowthRates(page);
-  const cashFlow = await getCashFlow(page);
+  const cashFlow = await getCashFlowRatio(Rpage);
   const financialHealth = await getFinancialHealth(page);
-  const performanceRatio = await getProfit(page);
+  const profits = await getProfit(page);
   return {
+    profits,
     growRates,
     cashFlow,
     financialHealth,
-    performanceRatio,
   };
 }
 module.exports = {
@@ -230,4 +295,7 @@ module.exports = {
   getActionPrice,
   getRatioKeys,
   acceptCookies,
+  getIncomeStatement,
+  getBalanceSheet,
+  getCashFlow,
 };
