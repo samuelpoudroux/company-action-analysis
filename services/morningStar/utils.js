@@ -72,7 +72,7 @@ async function getTableData(page, tabLink) {
 async function openBrowser() {
   return puppeteer.launch({
     ignoredHTTPSErrors: true,
-    headless: true,
+    args: ['--no-sandbox'] 
   });
 }
 async function closeBrowser(browser) {
