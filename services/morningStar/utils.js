@@ -1,11 +1,23 @@
 const _ = require('lodash');
-const puppeteer = require('puppeteer');
+// const puppeteer = require('puppeteer');
+
+// puppeteer-extra is a drop-in replacement for puppeteer,
+// it augments the installed puppeteer with plugin functionality.
+// Any number of plugins can be added through `puppeteer.use()`
+const puppeteer = require('puppeteer-extra');
+
+// Add stealth plugin and use defaults (all tricks to hide puppeteer usage)
+const StealthPlugin = require('puppeteer-extra-plugin-stealth');
+puppeteer.use(StealthPlugin());
+
+// Add adblocker plugin to block all ads and trackers (saves bandwidth)
+const AdblockerPlugin = require('puppeteer-extra-plugin-adblocker');
+puppeteer.use(AdblockerPlugin({ blockTrackers: true }));
 
 async function goToPage(url, page) {
   await page.goto(url, { waitUntil: 'networkidle2' });
 }
 async function acceptCookies(page) {
-  await page.click('#onetrust-accept-btn-handler');
   // is existing individual input
   const existingIndividualInput = await page.waitForSelector(
     '#btn_individual',
@@ -15,6 +27,7 @@ async function acceptCookies(page) {
   );
 
   if (existingIndividualInput) {
+    console.log('toto');
     return page.click('#btn_individual');
   }
 }
@@ -65,7 +78,7 @@ async function getTableData(page, tabLink) {
 async function openBrowser() {
   return puppeteer.launch({
     ignoredHTTPSErrors: true,
-    headless: true,
+    headless: false,
   });
 }
 async function closeBrowser(browser) {
