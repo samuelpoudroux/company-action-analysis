@@ -28,7 +28,7 @@ async function getMorningStarData(companyName) {
   const incomeStatement = await getIncomeStatement(page);
   const balanceSheet = await getBalanceSheet(page);
   const cashFlow = await getCashFlow(page);
-  // await closeBrowser(browser);
+  await closeBrowser(browser);
   return {
     name,
     price,
