@@ -1,19 +1,9 @@
-const puppeteer = require('puppeteer');
 const _ = require('lodash');
+const puppeteer = require('puppeteer');
 
-const removeItemOfArray = (array, element) => {
-  const index = array.findIndex((e) => e === element);
-  // remove useless title
-  array.splice(index, 1);
-};
-
-async function goToPage(url) {
-  const browser = await puppeteer.launch({ headless: false });
-  const page = await browser.newPage();
+async function goToPage(url, page) {
   await page.goto(url, { waitUntil: 'networkidle2' });
-  return page;
 }
-
 async function acceptCookies(page) {
   await page.click('#onetrust-accept-btn-handler');
   // is existing individual input
@@ -76,19 +66,22 @@ async function getTableData(page, tabLink) {
   return finalData;
 }
 
-async function closePage() {
-  const browser = await puppeteer.launch({
+async function openBrowser() {
+  return puppeteer.launch({
     ignoredHTTPSErrors: true,
     headless: false,
   });
+}
+async function closeBrowser(browser) {
   await browser.close();
 }
+
 async function searchActionByName(page, value) {
   await page.waitForSelector('#quoteSearch', {
     visible: true,
   });
   await page.click('#quoteSearch');
-  await page.type('#quoteSearch', value, { delay: 400 });
+  await page.type('#quoteSearch', value, { delay: 900 });
   await page.waitForSelector('.ac_results  .ac_over', {
     visible: true,
   });
@@ -288,8 +281,9 @@ async function getRatioKeys(page) {
   };
 }
 module.exports = {
+  openBrowser,
+  closeBrowser,
   goToPage,
-  closePage,
   searchActionByName,
   getActionName,
   getActionPrice,

@@ -1,5 +1,7 @@
-const { MORNING_STAR_URL } = require('./constants');
+const { MORNING_STAR_URL } = require('../../constants');
 const {
+  openBrowser,
+  closeBrowser,
   goToPage,
   getActionName,
   searchActionByName,
@@ -9,28 +11,20 @@ const {
   getIncomeStatement,
   getBalanceSheet,
   getCashFlow,
-} = require('./services');
-// const nodemailer = require('nodemailer');
-// require('dotenv').config();
+} = require('./utils');
 
-(async () => {
-  const page = await goToPage(MORNING_STAR_URL);
+async function getMorningStarData(companyName) {
+  const browser = await openBrowser();
+  const page = await browser.newPage();
+  await goToPage(MORNING_STAR_URL, page);
   await acceptCookies(page);
-  await searchActionByName(page, 'air liquide');
+  await searchActionByName(page, companyName);
   const name = await getActionName(page);
   const price = await getActionPrice(page);
   const incomeStatement = await getIncomeStatement(page);
   const balanceSheet = await getBalanceSheet(page);
   const cashFlow = await getCashFlow(page);
-  console.log(
-    JSON.stringify({
-      name,
-      price,
-      incomeStatement,
-      balanceSheet,
-      cashFlow,
-    })
-  );
+  await closeBrowser(browser);
   return {
     name,
     price,
@@ -38,4 +32,8 @@ const {
     balanceSheet,
     cashFlow,
   };
-})();
+}
+
+module.exports = {
+  getMorningStarData,
+};
