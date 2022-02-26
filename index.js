@@ -9,7 +9,7 @@ app.use(cors({
 
 app.use(morningStar)
 app.get('/', function (req, res) {
-    res.send('welcom to company action analysis');
+    res.send('welcom to company action analysis test');
   });
 
 const PORT = process.env.PORT || 5000
