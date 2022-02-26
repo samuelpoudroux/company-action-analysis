@@ -1,9 +1,4 @@
 const _ = require('lodash');
-// const puppeteer = require('puppeteer');
-
-// puppeteer-extra is a drop-in replacement for puppeteer,
-// it augments the installed puppeteer with plugin functionality.
-// Any number of plugins can be added through `puppeteer.use()`
 const puppeteer = require('puppeteer-extra');
 
 // Add stealth plugin and use defaults (all tricks to hide puppeteer usage)
@@ -113,7 +108,9 @@ async function getActionVolume(page) {
   await page.waitForSelector('#Col0DayVolume', {
     visible: true,
   });
-  return page.evaluate(() => document.querySelector('#Col0DayVolume').innerText);
+  return page.evaluate(
+    () => document.querySelector('#Col0DayVolume').innerText
+  );
 }
 async function getMarketCapitalisation(page) {
   await page.waitForSelector('#Col0MCap', {
