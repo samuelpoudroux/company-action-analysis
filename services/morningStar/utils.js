@@ -54,11 +54,7 @@ async function getTableData(page, tabLink) {
   };
 
   dataThs
-    .map((e) =>
-      _.startCase(e)
-        .normalize('NFD')
-        .replace(/([\u0300-\u036f]|[^0-9a-zA-Z])/g, '')
-    )
+    .map((e) => e)
     .forEach((key, index) => {
       finalData[key] = dataByTableRow[index];
     });
