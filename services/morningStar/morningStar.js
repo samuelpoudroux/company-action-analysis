@@ -8,6 +8,8 @@ const {
   acceptCookies,
   getRatioKeys,
   getActionPrice,
+  getActionVolume,
+  getMarketCapitalisation,
   getIncomeStatement,
   getBalanceSheet,
   getCashFlow,
@@ -21,13 +23,17 @@ async function getMorningStarData(companyName) {
   await searchActionByName(page, companyName);
   const name = await getActionName(page);
   const price = await getActionPrice(page);
+  const volume = await getActionVolume(page);
+  const marketCapitalization = await getMarketCapitalisation(page);
   const incomeStatement = await getIncomeStatement(page);
   const balanceSheet = await getBalanceSheet(page);
   const cashFlow = await getCashFlow(page);
-  await closeBrowser(browser);
+  // await closeBrowser(browser);
   return {
     name,
     price,
+    volume,
+    marketCapitalization,
     incomeStatement,
     balanceSheet,
     cashFlow,

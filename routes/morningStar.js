@@ -6,7 +6,6 @@ router.get('/morningStar/:companyName', async (req, res) => {
   try {
     if (req.params.companyName) {
       const data = await getMorningStarData(req.params.companyName);
-      console.log('data', data)
       return res.json(data);
     } else {
       res.status(400).send('le Nom de la company est requis');

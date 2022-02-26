@@ -27,7 +27,6 @@ async function acceptCookies(page) {
   );
 
   if (existingIndividualInput) {
-    console.log('toto');
     return page.click('#btn_individual');
   }
 }
@@ -109,6 +108,18 @@ async function getActionPrice(page) {
     visible: true,
   });
   return page.evaluate(() => document.querySelector('span.price').innerText);
+}
+async function getActionVolume(page) {
+  await page.waitForSelector('#Col0DayVolume', {
+    visible: true,
+  });
+  return page.evaluate(() => document.querySelector('#Col0DayVolume').innerText);
+}
+async function getMarketCapitalisation(page) {
+  await page.waitForSelector('#Col0MCap', {
+    visible: true,
+  });
+  return page.evaluate(() => document.querySelector('#Col0MCap').innerText);
 }
 
 async function getGrowthRates(page) {
@@ -296,6 +307,8 @@ module.exports = {
   searchActionByName,
   getActionName,
   getActionPrice,
+  getActionVolume,
+  getMarketCapitalisation,
   getRatioKeys,
   acceptCookies,
   getIncomeStatement,
