@@ -3,6 +3,10 @@ var cors = require('cors');
 var app = express();
 const morningStar = require('./routes/morningStar.js')
 
+app.use(cors({
+  origin: '*'
+}))
+
 app.use(morningStar)
 app.get('/', function (req, res) {
     res.send('welcom to company action analysis');
