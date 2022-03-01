@@ -72,7 +72,7 @@ async function getTableData(page, tabLink) {
 async function openBrowser() {
   return puppeteer.launch({
     ignoredHTTPSErrors: true,
-    args: ['--no-sandbox'] 
+    args: ['--no-sandbox'],
   });
 }
 async function closeBrowser(browser) {
@@ -84,7 +84,7 @@ async function searchActionByName(page, value) {
     visible: true,
   });
   await page.click('#quoteSearch');
-  await page.type('#quoteSearch', value, { delay: 900 });
+  await page.type('#quoteSearch', value, { delay: 300 });
   await page.waitForSelector('.ac_results  .ac_over', {
     visible: true,
   });
@@ -269,16 +269,34 @@ async function getProfit(page) {
   };
 }
 
-async function getIncomeStatement(page) {
-  return getTableData(page, 'LnkPage10');
+async function getIncomeStatement(page, cache, companyName) {
+  const cacheResult = cache.get(`${companyName}IncomeStatement`);
+  if (cacheResult) {
+    return cacheResult;
+  }
+  const result = await getTableData(page, 'LnkPage10');
+  cache.set(`${companyName}IncomeStatement`, result, 1000000000);
+  return result;
 }
 
-async function getBalanceSheet(page) {
-  return getTableData(page, 'LnkPage10Viewbs');
+async function getBalanceSheet(page, cache, companyName) {
+  const cacheResult = cache.get(`${companyName}BalanceSheet`);
+  if (cacheResult) {
+    return cacheResult;
+  }
+  const result = await getTableData(page, 'LnkPage10Viewbs');
+  cache.set(`${companyName}BalanceSheet`, result, 1000000000);
+  return result;
 }
 
-async function getCashFlow(page) {
-  return getTableData(page, 'LnkPage10Viewcf');
+async function getCashFlow(page, cache, companyName) {
+  const cacheResult = cache.get(`${companyName}CashFlow`);
+  if (cacheResult) {
+    return cacheResult;
+  }
+  const result = await getTableData(page, 'LnkPage10Viewcf');
+  cache.set(`${companyName}CashFlow`, result, 1000000000);
+  return result;
 }
 
 async function getRatioKeys(page) {

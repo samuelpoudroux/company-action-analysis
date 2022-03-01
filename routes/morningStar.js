@@ -3,6 +3,7 @@ const router = express.Router();
 const { getMorningStarData } = require('../services/morningStar/morningStar');
 const companies = require('../services/morningStar/companies.json');
 
+
 router.get('/morningStar/:companyName', async (req, res) => {
   try {
     if (req.params.companyName) {

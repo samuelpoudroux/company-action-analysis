@@ -14,6 +14,9 @@ const {
   getBalanceSheet,
   getCashFlow,
 } = require('./utils');
+const NodeCache = require( "node-cache" );
+
+const cache = new NodeCache();
 
 async function getMorningStarData(companyName) {
   console.log('openBrowser')
@@ -31,11 +34,11 @@ async function getMorningStarData(companyName) {
   console.log("getMarketCapitalisation")
   const marketCapitalization = await getMarketCapitalisation(page);
   console.log("getIncomeStatement")
-  const incomeStatement = await getIncomeStatement(page);
+  const incomeStatement = await getIncomeStatement(page, cache, companyName);
   console.log("getBalanceSheet")
-  const balanceSheet = await getBalanceSheet(page);
+  const balanceSheet = await getBalanceSheet(page, cache, companyName);
   console.log("getCashFlow")
-  const cashFlow = await getCashFlow(page);
+  const cashFlow = await getCashFlow(page, cache, companyName);
   await closeBrowser(browser);
   return {
     name,
