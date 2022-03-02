@@ -84,7 +84,7 @@ async function searchActionByName(page, value) {
     visible: true,
   });
   await page.click('#quoteSearch');
-  await page.type('#quoteSearch', value, { delay: 300 });
+  await page.type('#quoteSearch', value, { delay: 700 });
   await page.waitForSelector('.ac_results  .ac_over', {
     visible: true,
   });
@@ -299,6 +299,53 @@ async function getCashFlow(page, cache, companyName) {
   return result;
 }
 
+function formatResultValue(value) {
+  return value?.replace(/,/g, '.').replaceAll(/\s/g, '');
+}
+
+function getTotalOfArray(values) {
+  return values
+    .filter(function (element) {
+      return !isNaN(element);
+    })
+    .reduce((a, b) => a + b, 0)
+    .toFixed(2);
+}
+
+function getGrowthRateOnResults(results) {
+  const growthRates = results?.map((result, index) => {
+    const resultN = formatResultValue(result);
+    const resultNMinusOne = formatResultValue(results[index - 1]);
+    return Number(
+      parseFloat((resultN - resultNMinusOne) / resultNMinusOne).toFixed(4)
+    );
+  });
+  const average = getTotalOfArray(growthRates) / growthRates.length - 1;
+  return {
+    growthRates: growthRates.filter(function (element) {
+      return !isNaN(element);
+    }),
+    average,
+  };
+}
+
+function getAllRatios(elements) {
+  const {
+    price,
+    volume,
+    marketCapitalization,
+    incomeStatement,
+    balanceSheet,
+    cashFlow,
+  } = elements || {};
+
+  const growthRateOnResults = getGrowthRateOnResults(
+    incomeStatement['Résultat net']
+  );
+  return {
+    growthRateOnResults,
+  };
+}
 async function getRatioKeys(page) {
   await page.waitForSelector('#LnkPage11', {
     visible: true,
@@ -315,6 +362,7 @@ async function getRatioKeys(page) {
     financialHealth,
   };
 }
+
 module.exports = {
   openBrowser,
   closeBrowser,
@@ -329,4 +377,5 @@ module.exports = {
   getIncomeStatement,
   getBalanceSheet,
   getCashFlow,
+  getAllRatios,
 };
