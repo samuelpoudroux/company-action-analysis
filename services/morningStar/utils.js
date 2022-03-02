@@ -312,21 +312,37 @@ function getTotalOfArray(values) {
     .toFixed(2);
 }
 
-function getGrowthRateOnResults(results) {
+function getGrowthRateValues(results) {
   const growthRates = results?.map((result, index) => {
     const resultN = formatResultValue(result);
     const resultNMinusOne = formatResultValue(results[index - 1]);
     return Number(
-      parseFloat((resultN - resultNMinusOne) / resultNMinusOne).toFixed(4)
+      parseFloat((resultN - resultNMinusOne) / resultNMinusOne).toFixed(20)
     );
   });
-  const average = getTotalOfArray(growthRates) / growthRates.length - 1;
+  const average = getTotalOfArray(growthRates) / (growthRates.length - 1);
   return {
     growthRates: growthRates.filter(function (element) {
       return !isNaN(element);
     }),
     average,
   };
+}
+
+function getRatesOnTurnover(turnovers, values) {
+  try {
+    return values?.map((value, index) => {
+      const parseValue = Number(
+        parseFloat(formatResultValue(value)).toFixed(20)
+      );
+      const parseTurnover = Number(
+        parseFloat(formatResultValue(turnovers[index])).toFixed(20)
+      );
+      return parseValue / parseTurnover;
+    });
+  } catch (error) {
+    console.log('error', error);
+  }
 }
 
 function getAllRatios(elements) {
@@ -339,11 +355,37 @@ function getAllRatios(elements) {
     cashFlow,
   } = elements || {};
 
-  const growthRateOnResults = getGrowthRateOnResults(
+  const growthRatesOnTurnover = getGrowthRateValues(
+    incomeStatement["Chiffre d'affaires"]
+  );
+  const growthRatesOnGrossResults = getGrowthRateValues(
+    incomeStatement["Résultat brut d'exploitation"]
+  );
+  const growthRatesOnResults = getGrowthRateValues(incomeStatement['Résultat net']);
+  const growthRatesOnEBE = getGrowthRateValues(
+    incomeStatement["Résultat d'exploitation avant intérêts et impôts"]
+  );
+  const grossMarginRates = getRatesOnTurnover(
+    incomeStatement["Chiffre d'affaires"],
+    incomeStatement["Résultat brut d'exploitation"]
+  );
+  const marginRates = getRatesOnTurnover(
+    incomeStatement["Chiffre d'affaires"],
     incomeStatement['Résultat net']
   );
+  const ebeMarginRates = getRatesOnTurnover(
+    incomeStatement["Chiffre d'affaires"],
+    incomeStatement["Résultat d'exploitation avant intérêts et impôts"]
+  );
+
   return {
-    growthRateOnResults,
+    growthRatesOnTurnover,
+    growthRatesOnGrossResults,
+    growthRatesOnResults,
+    growthRatesOnEBE,
+    grossMarginRates,
+    marginRates,
+    ebeMarginRates,
   };
 }
 async function getRatioKeys(page) {
