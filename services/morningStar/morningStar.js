@@ -52,8 +52,6 @@ async function getMorningStarData(companyName) {
         cashFlow,
       });
         
-    console.log('ratios',ratios);
-    console.log('closeBrowser');
     await closeBrowser(browser);
     return {
       name,

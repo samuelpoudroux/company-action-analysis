@@ -348,12 +348,12 @@ function getRatesOnCriteria(criterias, values) {
 function getRoce(ebits, balanceSheet) {
   const equities = balanceSheet['Total des capitaux propres'];
   const debts = balanceSheet['Total des passifs circulant'];
-  const newCriterias = ebits.map(
-    (e, index) =>
-      (Number(parseFloat(formatResultValue(equities[index])).toFixed(20)) +
-      Number(parseFloat(formatResultValue(debts[index])).toFixed(20))).toString()
+  const newCriterias = ebits.map((e, index) =>
+    (
+      Number(parseFloat(formatResultValue(equities[index])).toFixed(20)) +
+      Number(parseFloat(formatResultValue(debts[index])).toFixed(20))
+    ).toString()
   );
-  console.log('toto',getRatesOnCriteria(newCriterias, ebits) )
   return getRatesOnCriteria(newCriterias, ebits);
 }
 
@@ -420,7 +420,7 @@ function getAllRatios(elements) {
     ebeMarginRates,
     roeRates,
     roaRates,
-    roceRates
+    roceRates,
   };
 }
 async function getRatioKeys(page) {
