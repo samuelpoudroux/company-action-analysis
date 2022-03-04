@@ -318,7 +318,7 @@ function getTotalOfArray(values) {
 
 function getGrowthRateValues(results) {
   const growthRates = results?.map((result, index) => {
-    return ((result - results[index - 1]) / results[index - 1]);
+    return (result - results[index - 1]) / results[index - 1];
   });
   const average = getTotalOfArray(growthRates) / (growthRates.length - 1);
   return {
@@ -342,9 +342,7 @@ function getRatesOnCriteria(criterias, values) {
 function getRoce(ebits, balanceSheet) {
   const equities = balanceSheet['Total des capitaux propres'];
   const debts = balanceSheet['Total des passifs circulant'];
-  const newCriterias = ebits.map(
-    (e, index) => equities[index] + debts[index]
-  );
+  const newCriterias = ebits.map((e, index) => equities[index] + debts[index]);
   return getRatesOnCriteria(newCriterias, ebits);
 }
 
@@ -405,6 +403,7 @@ function getAllRatios(elements) {
     const per =
       Number(parseFloat(price.replaceAll(',', '.')).toFixed(2)) /
       incomeStatement['Dilué'][incomeStatement['Dilué'].length - 1];
+    const peg = per / growthRatesOnResults.average;
 
     return {
       growthRatesOnTurnover,
@@ -418,6 +417,7 @@ function getAllRatios(elements) {
       roaRates,
       roceRates,
       per,
+      peg,
     };
   } catch (error) {
     throw new Error(error);
