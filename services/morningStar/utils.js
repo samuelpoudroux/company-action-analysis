@@ -12,6 +12,7 @@ puppeteer.use(AdblockerPlugin({ blockTrackers: true }));
 async function goToPage(url, page) {
   await page.goto(url, { waitUntil: 'networkidle2' });
 }
+
 async function acceptCookies(page) {
   // is existing individual input
   const existingIndividualInput = await page.waitForSelector(
@@ -51,7 +52,15 @@ async function getTableData(page, tabLink) {
   });
 
   const dataTds = await page.$$eval('table.years5 tbody td', (tds) => {
-    return tds.map((td) => td.textContent);
+    return tds.map((td) => {
+      const convertData = td.textContent
+        .replaceAll(/\s/g, '')
+        .replace(/,/g, '.');
+      if (!isNaN(convertData)) {
+        return Number(parseFloat(convertData).toFixed(2));
+      }
+      return td.textContent;
+    });
   });
 
   const dataByTableRow = _.chunk(dataTds, treatedYears.length);
@@ -299,26 +308,17 @@ async function getCashFlow(page, cache, companyName) {
   return result;
 }
 
-function formatResultValue(value) {
-  return value?.replace(/,/g, '.').replaceAll(/\s/g, '');
-}
-
 function getTotalOfArray(values) {
   return values
     .filter(function (element) {
       return !isNaN(element);
     })
-    .reduce((a, b) => a + b, 0)
-    .toFixed(2);
+    .reduce((a, b) => a + b, 0);
 }
 
 function getGrowthRateValues(results) {
   const growthRates = results?.map((result, index) => {
-    const resultN = formatResultValue(result);
-    const resultNMinusOne = formatResultValue(results[index - 1]);
-    return Number(
-      parseFloat((resultN - resultNMinusOne) / resultNMinusOne).toFixed(20)
-    );
+    return ((result - results[index - 1]) / results[index - 1]);
   });
   const average = getTotalOfArray(growthRates) / (growthRates.length - 1);
   return {
@@ -332,13 +332,7 @@ function getGrowthRateValues(results) {
 function getRatesOnCriteria(criterias, values) {
   try {
     return values?.map((value, index) => {
-      const parseValue = Number(
-        parseFloat(formatResultValue(value)).toFixed(20)
-      );
-      const parseCriteria = Number(
-        parseFloat(formatResultValue(criterias[index])).toFixed(20)
-      );
-      return parseValue / parseCriteria;
+      return value / criterias[index];
     });
   } catch (error) {
     console.log('error', error);
@@ -348,80 +342,86 @@ function getRatesOnCriteria(criterias, values) {
 function getRoce(ebits, balanceSheet) {
   const equities = balanceSheet['Total des capitaux propres'];
   const debts = balanceSheet['Total des passifs circulant'];
-  const newCriterias = ebits.map((e, index) =>
-    (
-      Number(parseFloat(formatResultValue(equities[index])).toFixed(20)) +
-      Number(parseFloat(formatResultValue(debts[index])).toFixed(20))
-    ).toString()
+  const newCriterias = ebits.map(
+    (e, index) => equities[index].toFixed(20) + debts[index].toFixed(20)
   );
   return getRatesOnCriteria(newCriterias, ebits);
 }
 
 function getAllRatios(elements) {
-  const {
-    price,
-    volume,
-    marketCapitalization,
-    incomeStatement,
-    balanceSheet,
-    cashFlow,
-  } = elements || {};
+  try {
+    const {
+      price,
+      volume,
+      marketCapitalization,
+      incomeStatement,
+      balanceSheet,
+      cashFlow,
+    } = elements || {};
 
-  const growthRatesOnTurnover = getGrowthRateValues(
-    incomeStatement["Chiffre d'affaires"]
-  );
-  const growthRatesOnGrossResults = getGrowthRateValues(
-    incomeStatement["Résultat brut d'exploitation"]
-  );
-  const growthRatesOnResults = getGrowthRateValues(
-    incomeStatement['Résultat net']
-  );
-  const growthRatesOnEBE = getGrowthRateValues(
-    incomeStatement["Résultat d'exploitation avant intérêts et impôts"]
-  );
-  //RBE/CA
-  const grossMarginRates = getRatesOnCriteria(
-    incomeStatement["Chiffre d'affaires"],
-    incomeStatement["Résultat brut d'exploitation"]
-  );
-  //RESULT/CA
-  const marginRates = getRatesOnCriteria(
-    incomeStatement["Chiffre d'affaires"],
-    incomeStatement['Résultat net']
-  );
-  //EBE/CA
-  const ebeMarginRates = getRatesOnCriteria(
-    incomeStatement["Chiffre d'affaires"],
-    incomeStatement["Résultat d'exploitation avant intérêts et impôts"]
-  );
-  //RN/CAPITAUXPROPRES
-  const roeRates = getRatesOnCriteria(
-    balanceSheet['Total des capitaux propres'],
-    incomeStatement['Résultat net']
-  );
-  //RN/TOTAL DES ACTIFS
-  const roaRates = getRatesOnCriteria(
-    balanceSheet["Total de l'actif"],
-    incomeStatement['Résultat net']
-  );
-  //EBIT/(CP + dettes)
-  const roceRates = getRoce(
-    incomeStatement["Résultat d'exploitation avant intérêts et impôts"],
-    balanceSheet
-  );
+    const growthRatesOnTurnover = getGrowthRateValues(
+      incomeStatement["Chiffre d'affaires"]
+    );
+    const growthRatesOnGrossResults = getGrowthRateValues(
+      incomeStatement["Résultat brut d'exploitation"]
+    );
+    const growthRatesOnResults = getGrowthRateValues(
+      incomeStatement['Résultat net']
+    );
+    const growthRatesOnEBE = getGrowthRateValues(
+      incomeStatement["Résultat d'exploitation avant intérêts et impôts"]
+    );
+    //RBE/CA
+    const grossMarginRates = getRatesOnCriteria(
+      incomeStatement["Chiffre d'affaires"],
+      incomeStatement["Résultat brut d'exploitation"]
+    );
+    //RESULT/CA
+    const marginRates = getRatesOnCriteria(
+      incomeStatement["Chiffre d'affaires"],
+      incomeStatement['Résultat net']
+    );
+    //EBE/CA
+    const ebeMarginRates = getRatesOnCriteria(
+      incomeStatement["Chiffre d'affaires"],
+      incomeStatement["Résultat d'exploitation avant intérêts et impôts"]
+    );
+    //RN/CAPITAUXPROPRES
+    const roeRates = getRatesOnCriteria(
+      balanceSheet['Total des capitaux propres'],
+      incomeStatement['Résultat net']
+    );
+    //RN/TOTAL DES ACTIFS
+    const roaRates = getRatesOnCriteria(
+      balanceSheet["Total de l'actif"],
+      incomeStatement['Résultat net']
+    );
+    //EBIT/(CP + dettes)
+    const roceRates = getRoce(
+      incomeStatement["Résultat d'exploitation avant intérêts et impôts"],
+      balanceSheet
+    );
+    
+    const per =
+      Number(parseFloat(price.replaceAll(',', '.')).toFixed(2)) /
+      incomeStatement['Dilué'][incomeStatement['Dilué'].length - 1];
 
-  return {
-    growthRatesOnTurnover,
-    growthRatesOnGrossResults,
-    growthRatesOnResults,
-    growthRatesOnEBE,
-    grossMarginRates,
-    marginRates,
-    ebeMarginRates,
-    roeRates,
-    roaRates,
-    roceRates,
-  };
+    return {
+      growthRatesOnTurnover,
+      growthRatesOnGrossResults,
+      growthRatesOnResults,
+      growthRatesOnEBE,
+      grossMarginRates,
+      marginRates,
+      ebeMarginRates,
+      roeRates,
+      roaRates,
+      roceRates,
+      per,
+    };
+  } catch (error) {
+    throw new Error(error);
+  }
 }
 async function getRatioKeys(page) {
   await page.waitForSelector('#LnkPage11', {

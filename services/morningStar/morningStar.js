@@ -64,7 +64,7 @@ async function getMorningStarData(companyName) {
       ratios,
     };
   } catch (error) {
-    console.log('getMorningStarData', JSON.stringify(error))
+    console.log('getMorningStarData', error)
   }
 }
 
