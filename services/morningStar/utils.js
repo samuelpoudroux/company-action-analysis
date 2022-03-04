@@ -403,7 +403,13 @@ function getAllRatios(elements) {
     const per =
       Number(parseFloat(price.replaceAll(',', '.')).toFixed(2)) /
       incomeStatement['Dilué'][incomeStatement['Dilué'].length - 1];
-    const peg = per / growthRatesOnResults.average;
+    const peg = per / (growthRatesOnResults.average * 100);
+    const lastYear = balanceSheet['Total des passifs circulant'].length - 1;
+    const debtsRate =
+      (balanceSheet['Total des passifs circulant'][lastYear] +
+        balanceSheet['Impôts différés passifs'][lastYear] +
+        balanceSheet['Dettes à long terme'][lastYear]) /
+      balanceSheet['Total actifs circulants'][lastYear];
 
     return {
       growthRatesOnTurnover,
@@ -418,6 +424,7 @@ function getAllRatios(elements) {
       roceRates,
       per,
       peg,
+      debtsRate
     };
   } catch (error) {
     throw new Error(error);
