@@ -343,7 +343,7 @@ function getRoce(ebits, balanceSheet) {
   const equities = balanceSheet['Total des capitaux propres'];
   const debts = balanceSheet['Total des passifs circulant'];
   const newCriterias = ebits.map(
-    (e, index) => equities[index].toFixed(20) + debts[index].toFixed(20)
+    (e, index) => equities[index] + debts[index]
   );
   return getRatesOnCriteria(newCriterias, ebits);
 }
@@ -401,7 +401,7 @@ function getAllRatios(elements) {
       incomeStatement["Résultat d'exploitation avant intérêts et impôts"],
       balanceSheet
     );
-    
+
     const per =
       Number(parseFloat(price.replaceAll(',', '.')).toFixed(2)) /
       incomeStatement['Dilué'][incomeStatement['Dilué'].length - 1];
