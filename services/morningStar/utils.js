@@ -354,6 +354,10 @@ function getRoa(results, balanceSheet) {
   return getRatesOnCriteria(newCriterias, results);
 }
 
+function getAverage(values) {
+  return values.reduce((a, b) => a + b, 0) / values.length;
+}
+
 function getAllRatios(elements) {
   try {
     const {
@@ -365,11 +369,23 @@ function getAllRatios(elements) {
       cashFlow,
     } = elements || {};
 
+    const lastYear = balanceSheet['Total des passifs circulant'].length - 1;
     const growthRatesOnTurnover = getGrowthRateValues(
       incomeStatement["Chiffre d'affaires"]
     );
+    const turnoverAverage = getAverage(incomeStatement["Chiffre d'affaires"]);
+    const equityAverage = getAverage(
+      balanceSheet['Total des capitaux propres']
+    );
+    const resultsAverage = getAverage(incomeStatement['Résultat net']);
+    const resultsAverageBeforeFiscality = getAverage(
+      incomeStatement["Résultat d'exploitation avant intérêts et impôts"]
+    );
     const growthRatesOnGrossResults = getGrowthRateValues(
       incomeStatement["Résultat brut d'exploitation"]
+    );
+    const growthRatesOnEquity = getGrowthRateValues(
+      balanceSheet['Total des capitaux propres']
     );
     const growthRatesOnResults = getGrowthRateValues(
       incomeStatement['Résultat net']
@@ -377,39 +393,38 @@ function getAllRatios(elements) {
     const growthRatesOnEBE = getGrowthRateValues(
       incomeStatement["Résultat d'exploitation avant intérêts et impôts"]
     );
-    //RBE/CA
+    const growthRatesOnAvailableCashFlow = getGrowthRateValues(
+      cashFlow['Flux tréso disponible']
+    );
     const grossMarginRates = getRatesOnCriteria(
       incomeStatement["Chiffre d'affaires"],
       incomeStatement["Résultat d'exploitation avant intérêts et impôts"]
     );
-    //RESULT/CA
     const marginRates = getRatesOnCriteria(
       incomeStatement["Chiffre d'affaires"],
       incomeStatement['Résultat net']
     );
-    //EBE/CA
     const ebeMarginRates = getRatesOnCriteria(
       incomeStatement["Chiffre d'affaires"],
       incomeStatement["Résultat d'exploitation avant intérêts et impôts"]
     );
-    //RN/CAPITAUXPROPRES
     const roeRates = getRatesOnCriteria(
       balanceSheet['Total des capitaux propres'],
       incomeStatement['Résultat net']
     );
-    //RN/TOTAL DES ACTIFS
     const roaRates = getRoa(incomeStatement['Résultat net'], balanceSheet);
-    //EBIT/(CP + dettes)
     const roceRates = getRoce(
       incomeStatement["Résultat d'exploitation avant intérêts et impôts"],
       balanceSheet
     );
 
+    const equityRatio =
+      balanceSheet['Total des capitaux propres'][lastYear] /
+      balanceSheet["Total de l'actif"][lastYear];
     const per =
       Number(parseFloat(price.replaceAll(',', '.')).toFixed(2)) /
       incomeStatement['Dilué'][incomeStatement['Dilué'].length - 1];
     const peg = per / (growthRatesOnResults.average * 100);
-    const lastYear = balanceSheet['Total des passifs circulant'].length - 1;
     const ltDebtsOnAssetRate =
       balanceSheet['Dettes à long terme'][lastYear] /
       balanceSheet["Total de l'actif"][lastYear];
@@ -417,8 +432,52 @@ function getAllRatios(elements) {
       balanceSheet['Dettes à long terme'][lastYear] /
       incomeStatement['Résultat net'][lastYear];
 
+    const cashFlowOnTurnoverRate =
+      cashFlow['Flux tréso disponible'][lastYear] /
+      incomeStatement["Chiffre d'affaires"][lastYear];
+
+    const activeCashFlowRate =
+      balanceSheet[
+        'Total trésorerie, quasi-trésorerie et placements à court terme'
+      ][lastYear] / balanceSheet["Total de l'actif"][lastYear];
+    const debts =
+      balanceSheet['Dettes à long terme'][lastYear] +
+      balanceSheet['Dette courante'][lastYear] -
+      balanceSheet[
+        'Total trésorerie, quasi-trésorerie et placements à court terme'
+      ][lastYear];
+
+    const gearing =
+      debts / balanceSheet['Total des capitaux propres'][lastYear];
+
+    const cashFlowProvidedByExploitationAverage = getAverage(
+      cashFlow[
+        "Flux de trésorerie nets fournis par les activités d'exploitation"
+      ]
+    );
+    const growthRatesOncashFlowProvidedByExploitationAverage =
+      getGrowthRateValues(
+        cashFlow[
+          "Flux de trésorerie nets fournis par les activités d'exploitation"
+        ]
+      );
+    const cashFlowProvidedByExploitationOnTurnoverRate =
+      cashFlow[
+        "Flux de trésorerie nets fournis par les activités d'exploitation"
+      ][lastYear] / incomeStatement["Chiffre d'affaires"][lastYear];
+
+    const cashFlowProvidedByInvestmentOnResultsRate =
+      cashFlow[
+        "Flux nets de trésorerie utilisés pour les activités d'investissement"
+      ][lastYear] / incomeStatement['Résultat net'][lastYear];
+
     return {
+      turnoverAverage,
+      resultsAverage,
+      equityAverage,
+      resultsAverageBeforeFiscality,
       growthRatesOnTurnover,
+      growthRatesOnEquity,
       growthRatesOnGrossResults,
       growthRatesOnResults,
       growthRatesOnEBE,
@@ -432,7 +491,16 @@ function getAllRatios(elements) {
       peg,
       ltDebtsOnAssetRate,
       ltDebtsOnResultRate,
-      debts
+      debts,
+      equityRatio,
+      gearing,
+      activeCashFlowRate,
+      cashFlowOnTurnoverRate,
+      growthRatesOnAvailableCashFlow,
+      cashFlowProvidedByExploitationAverage,
+      growthRatesOncashFlowProvidedByExploitationAverage,
+      cashFlowProvidedByExploitationOnTurnoverRate,
+      cashFlowProvidedByInvestmentOnResultsRate,
     };
   } catch (error) {
     throw new Error(error);
