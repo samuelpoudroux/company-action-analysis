@@ -341,9 +341,17 @@ function getRatesOnCriteria(criterias, values) {
 
 function getRoce(ebits, balanceSheet) {
   const equities = balanceSheet['Total des capitaux propres'];
-  const debts = balanceSheet['Total des passifs circulant'];
+  const debts = balanceSheet['Dettes à long terme'];
   const newCriterias = ebits.map((e, index) => equities[index] + debts[index]);
   return getRatesOnCriteria(newCriterias, ebits);
+}
+function getRoa(results, balanceSheet) {
+  const totalAssets = balanceSheet["Total de l'actif"];
+  const debts = balanceSheet['Dettes à long terme'];
+  const newCriterias = results.map(
+    (e, index) => totalAssets[index] + debts[index]
+  );
+  return getRatesOnCriteria(newCriterias, results);
 }
 
 function getAllRatios(elements) {
@@ -372,7 +380,7 @@ function getAllRatios(elements) {
     //RBE/CA
     const grossMarginRates = getRatesOnCriteria(
       incomeStatement["Chiffre d'affaires"],
-      incomeStatement["Résultat brut d'exploitation"]
+      incomeStatement["Résultat d'exploitation avant intérêts et impôts"]
     );
     //RESULT/CA
     const marginRates = getRatesOnCriteria(
@@ -390,10 +398,7 @@ function getAllRatios(elements) {
       incomeStatement['Résultat net']
     );
     //RN/TOTAL DES ACTIFS
-    const roaRates = getRatesOnCriteria(
-      balanceSheet["Total de l'actif"],
-      incomeStatement['Résultat net']
-    );
+    const roaRates = getRoa(incomeStatement['Résultat net'], balanceSheet);
     //EBIT/(CP + dettes)
     const roceRates = getRoce(
       incomeStatement["Résultat d'exploitation avant intérêts et impôts"],
@@ -405,11 +410,12 @@ function getAllRatios(elements) {
       incomeStatement['Dilué'][incomeStatement['Dilué'].length - 1];
     const peg = per / (growthRatesOnResults.average * 100);
     const lastYear = balanceSheet['Total des passifs circulant'].length - 1;
-    const debtsRate =
-      (balanceSheet['Total des passifs circulant'][lastYear] +
-        balanceSheet['Impôts différés passifs'][lastYear] +
-        balanceSheet['Dettes à long terme'][lastYear]) /
-      balanceSheet['Total actifs circulants'][lastYear];
+    const ltDebtsOnAssetRate =
+      balanceSheet['Dettes à long terme'][lastYear] /
+      balanceSheet["Total de l'actif"][lastYear];
+    const ltDebtsOnResultRate =
+      balanceSheet['Dettes à long terme'][lastYear] /
+      incomeStatement['Résultat net'][lastYear];
 
     return {
       growthRatesOnTurnover,
@@ -424,7 +430,9 @@ function getAllRatios(elements) {
       roceRates,
       per,
       peg,
-      debtsRate
+      ltDebtsOnAssetRate,
+      ltDebtsOnResultRate,
+      debts
     };
   } catch (error) {
     throw new Error(error);
