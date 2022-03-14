@@ -398,7 +398,7 @@ function getAllRatios(elements) {
     );
     const grossMarginRates = getRatesOnCriteria(
       incomeStatement["Chiffre d'affaires"],
-      incomeStatement["Résultat d'exploitation avant intérêts et impôts"]
+      incomeStatement["Résultat brut d'exploitation"]
     );
     const marginRates = getRatesOnCriteria(
       incomeStatement["Chiffre d'affaires"],
