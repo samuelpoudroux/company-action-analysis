@@ -355,7 +355,17 @@ function getRoa(results, balanceSheet) {
 }
 
 function getAverage(values) {
-  return values.reduce((a, b) => a + b, 0) / values.length;
+  return (
+    values.reduce((a, b) => {
+      if (a === '-') {
+        a = 0;
+      } else if (b === '-') {
+        b = 0;
+      }
+      //TODO mise en place de la règle de gestion cocnernant quand pas de Valeur indiqué
+      return a + b;
+    }, 0) / values.length
+  );
 }
 
 function getAllRatios(elements) {
