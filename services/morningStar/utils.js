@@ -452,9 +452,9 @@ function getAllRatios(elements) {
       ][lastYear] / balanceSheet["Total de l'actif"][lastYear];
     const debts =
       balanceSheet['Dettes à long terme'][lastYear] +
-      balanceSheet['Dette courante'][lastYear] -
+      balanceSheet['Dette courante'][lastYear] +
       balanceSheet[
-        'Total trésorerie, quasi-trésorerie et placements à court terme'
+        'Dettes fournisseurs'
       ][lastYear];
 
     const gearing =
