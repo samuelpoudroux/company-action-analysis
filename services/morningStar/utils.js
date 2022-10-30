@@ -1,29 +1,29 @@
-const _ = require('lodash');
-const puppeteer = require('puppeteer-extra');
+const _ = require("lodash");
+const puppeteer = require("puppeteer-extra");
 
 // Add stealth plugin and use defaults (all tricks to hide puppeteer usage)
-const StealthPlugin = require('puppeteer-extra-plugin-stealth');
+const StealthPlugin = require("puppeteer-extra-plugin-stealth");
 puppeteer.use(StealthPlugin());
 
 // Add adblocker plugin to block all ads and trackers (saves bandwidth)
-const AdblockerPlugin = require('puppeteer-extra-plugin-adblocker');
+const AdblockerPlugin = require("puppeteer-extra-plugin-adblocker");
 puppeteer.use(AdblockerPlugin({ blockTrackers: true }));
 
 async function goToPage(url, page) {
-  await page.goto(url, { waitUntil: 'networkidle2' });
+  await page.goto(url, { waitUntil: "networkidle2" });
 }
 
 async function acceptCookies(page) {
   // is existing individual input
   const existingIndividualInput = await page.waitForSelector(
-    '#btn_individual',
+    "#btn_individual",
     {
       visible: true,
     }
   );
 
   if (existingIndividualInput) {
-    return page.click('#btn_individual');
+    return page.click("#btn_individual");
   }
 }
 
@@ -35,11 +35,11 @@ async function getTableData(page, tabLink) {
   const tab = await page.$(`#${tabLink}`);
   await page.evaluate((el) => el.click(), tab);
 
-  await page.waitForSelector('table.years5', {
+  await page.waitForSelector("table.years5", {
     visible: true,
   });
 
-  const years = await page.$$eval('table.years5 > thead > tr > th', (ths) => {
+  const years = await page.$$eval("table.years5 > thead > tr > th", (ths) => {
     return ths.map((th) => th.textContent);
   });
 
@@ -47,15 +47,15 @@ async function getTableData(page, tabLink) {
   treatedYears.shift();
   years.shift();
 
-  const dataThs = await page.$$eval('table.years5 tbody th[headers]', (tds) => {
+  const dataThs = await page.$$eval("table.years5 tbody th[headers]", (tds) => {
     return tds.map((td) => td.textContent);
   });
 
-  const dataTds = await page.$$eval('table.years5 tbody td', (tds) => {
+  const dataTds = await page.$$eval("table.years5 tbody td", (tds) => {
     return tds.map((td) => {
       const convertData = td.textContent
-        .replaceAll(/\s/g, '')
-        .replace(/,/g, '.');
+        .replaceAll(/\s/g, "")
+        .replace(/,/g, ".");
       if (!isNaN(convertData)) {
         return Number(parseFloat(convertData).toFixed(2));
       }
@@ -81,7 +81,7 @@ async function getTableData(page, tabLink) {
 async function openBrowser() {
   return puppeteer.launch({
     ignoredHTTPSErrors: true,
-    args: ['--no-sandbox'],
+    args: ["--no-sandbox"],
   });
 }
 async function closeBrowser(browser) {
@@ -89,62 +89,62 @@ async function closeBrowser(browser) {
 }
 
 async function searchActionByName(page, value) {
-  await page.waitForSelector('#quoteSearch', {
+  await page.waitForSelector("#quoteSearch", {
     visible: true,
   });
-  await page.click('#quoteSearch');
-  await page.type('#quoteSearch', value, { delay: 700 });
-  await page.waitForSelector('.ac_results  .ac_over', {
+  await page.click("#quoteSearch");
+  await page.type("#quoteSearch", value, { delay: 700 });
+  await page.waitForSelector(".ac_results  .ac_over", {
     visible: true,
   });
-  await page.click('.ac_results  .ac_over');
+  await page.click(".ac_results  .ac_over");
 }
 async function getActionName(page) {
-  await page.waitForSelector('.securityName', {
+  await page.waitForSelector(".securityName", {
     visible: true,
   });
 
-  return page.evaluate(() => document.querySelector('.securityName').innerText);
+  return page.evaluate(() => document.querySelector(".securityName").innerText);
 }
 
 async function getActionPrice(page) {
-  await page.waitForSelector('.price', {
+  await page.waitForSelector(".price", {
     visible: true,
   });
-  return page.evaluate(() => document.querySelector('span.price').innerText);
+  return page.evaluate(() => document.querySelector("span.price").innerText);
 }
 async function getActionVolume(page) {
-  await page.waitForSelector('#Col0DayVolume', {
+  await page.waitForSelector("#Col0DayVolume", {
     visible: true,
   });
   return page.evaluate(
-    () => document.querySelector('#Col0DayVolume').innerText
+    () => document.querySelector("#Col0DayVolume").innerText
   );
 }
 async function getMarketCapitalisation(page) {
-  await page.waitForSelector('#Col0MCap', {
+  await page.waitForSelector("#Col0MCap", {
     visible: true,
   });
-  return page.evaluate(() => document.querySelector('#Col0MCap').innerText);
+  return page.evaluate(() => document.querySelector("#Col0MCap").innerText);
 }
 
 async function getGrowthRates(page) {
   // go to growthRateTabs----------
-  await page.waitForSelector('#LnkPage11Viewgr', {
+  await page.waitForSelector("#LnkPage11Viewgr", {
     visible: true,
   });
 
-  const growthRateTab = await page.$('#LnkPage11Viewgr');
+  const growthRateTab = await page.$("#LnkPage11Viewgr");
   await page.evaluate((el) => el.click(), growthRateTab);
 
-  await page.waitForSelector('table.years5', {
+  await page.waitForSelector("table.years5", {
     visible: true,
   });
-  const years = await page.$$eval('table.years5 > thead > tr > th', (ths) => {
+  const years = await page.$$eval("table.years5 > thead > tr > th", (ths) => {
     return ths.map((th) => th.textContent);
   });
   years.shift();
-  const growthData = await page.$$eval('table.years5 tbody td', (tds) => {
+  const growthData = await page.$$eval("table.years5 tbody td", (tds) => {
     return tds.map((td) => td.textContent);
   });
   const growDataByTableRow = _.chunk(growthData, years.length);
@@ -169,21 +169,21 @@ async function getGrowthRates(page) {
 }
 
 async function getCashFlowRatio(page) {
-  await page.waitForSelector('#LnkPage11Viewcf', {
+  await page.waitForSelector("#LnkPage11Viewcf", {
     visible: true,
   });
 
-  const cashFlowTab = await page.$('#LnkPage11Viewcf');
+  const cashFlowTab = await page.$("#LnkPage11Viewcf");
   await page.evaluate((el) => el.click(), cashFlowTab);
 
-  await page.waitForSelector('table.years5', {
+  await page.waitForSelector("table.years5", {
     visible: true,
   });
-  const years = await page.$$eval('table.years5 > thead > tr > th', (ths) => {
+  const years = await page.$$eval("table.years5 > thead > tr > th", (ths) => {
     return ths.map((th) => th.textContent);
   });
   years.shift();
-  const cashFlowData = await page.$$eval('table.years5 tbody td', (tds) => {
+  const cashFlowData = await page.$$eval("table.years5 tbody td", (tds) => {
     return tds.map((td) => td.textContent);
   });
   const cashFlowDataByTableRow = _.chunk(cashFlowData, years.length);
@@ -198,24 +198,24 @@ async function getCashFlowRatio(page) {
 }
 
 async function getFinancialHealth(page) {
-  await page.waitForSelector('#LnkPage11Viewfh', {
+  await page.waitForSelector("#LnkPage11Viewfh", {
     visible: true,
   });
 
-  const financialHealthTab = await page.$('#LnkPage11Viewfh');
+  const financialHealthTab = await page.$("#LnkPage11Viewfh");
   await page.evaluate((el) => el.click(), financialHealthTab);
 
-  await page.waitForSelector('table.years5', {
+  await page.waitForSelector("table.years5", {
     visible: true,
   });
-  const years = await page.$$eval('table.years5 > thead > tr > th', (ths) => {
+  const years = await page.$$eval("table.years5 > thead > tr > th", (ths) => {
     return ths.map((th) => th.textContent);
   });
   const treatedYears = _.uniq(years);
   treatedYears.shift();
 
   const financialHealthData = await page.$$eval(
-    'table.years5 tbody td',
+    "table.years5 tbody td",
     (tds) => {
       return tds.map((td) => td.textContent);
     }
@@ -241,18 +241,18 @@ async function getFinancialHealth(page) {
 }
 
 async function getProfit(page) {
-  await page.waitForSelector('#LnkPage11Viewpr', {
+  await page.waitForSelector("#LnkPage11Viewpr", {
     visible: true,
   });
 
-  const performance = await page.$('#LnkPage11Viewpr');
+  const performance = await page.$("#LnkPage11Viewpr");
   await page.evaluate((el) => el.click(), performance);
 
-  await page.waitForSelector('table.years5', {
+  await page.waitForSelector("table.years5", {
     visible: true,
   });
 
-  const years = await page.$$eval('table.years5 > thead > tr > th', (ths) => {
+  const years = await page.$$eval("table.years5 > thead > tr > th", (ths) => {
     return ths.map((th) => th.textContent);
   });
 
@@ -260,7 +260,7 @@ async function getProfit(page) {
   treatedYears.shift();
   years.shift();
 
-  const profitData = await page.$$eval('table.years5 tbody td', (tds) => {
+  const profitData = await page.$$eval("table.years5 tbody td", (tds) => {
     return tds.map((td) => td.textContent);
   });
 
@@ -283,7 +283,7 @@ async function getIncomeStatement(page, cache, companyName) {
   if (cacheResult) {
     return cacheResult;
   }
-  const result = await getTableData(page, 'LnkPage10');
+  const result = await getTableData(page, "LnkPage10");
   cache.set(`${companyName}IncomeStatement`, result, 1000000000);
   return result;
 }
@@ -293,7 +293,7 @@ async function getBalanceSheet(page, cache, companyName) {
   if (cacheResult) {
     return cacheResult;
   }
-  const result = await getTableData(page, 'LnkPage10Viewbs');
+  const result = await getTableData(page, "LnkPage10Viewbs");
   cache.set(`${companyName}BalanceSheet`, result, 1000000000);
   return result;
 }
@@ -303,7 +303,7 @@ async function getCashFlow(page, cache, companyName) {
   if (cacheResult) {
     return cacheResult;
   }
-  const result = await getTableData(page, 'LnkPage10Viewcf');
+  const result = await getTableData(page, "LnkPage10Viewcf");
   cache.set(`${companyName}CashFlow`, result, 1000000000);
   return result;
 }
@@ -335,19 +335,19 @@ function getRatesOnCriteria(criterias, values) {
       return value / criterias[index];
     });
   } catch (error) {
-    console.log('error', error);
+    console.log("error", error);
   }
 }
 
 function getRoce(ebits, balanceSheet) {
-  const equities = balanceSheet['Total des capitaux propres'];
-  const debts = balanceSheet['Dettes à long terme'];
+  const equities = balanceSheet["Total des capitaux propres"];
+  const debts = balanceSheet["Dettes à long terme"];
   const newCriterias = ebits.map((e, index) => equities[index] + debts[index]);
   return getRatesOnCriteria(newCriterias, ebits);
 }
 function getRoa(results, balanceSheet) {
   const totalAssets = balanceSheet["Total de l'actif"];
-  const debts = balanceSheet['Dettes à long terme'];
+  const debts = balanceSheet["Dettes à long terme"];
   const newCriterias = results.map(
     (e, index) => totalAssets[index] + debts[index]
   );
@@ -357,9 +357,9 @@ function getRoa(results, balanceSheet) {
 function getAverage(values) {
   return (
     values.reduce((a, b) => {
-      if (a === '-') {
+      if (a === "-") {
         a = 0;
-      } else if (b === '-') {
+      } else if (b === "-") {
         b = 0;
       }
       //TODO mise en place de la règle de gestion cocnernant quand pas de Valeur indiqué
@@ -379,15 +379,15 @@ function getAllRatios(elements) {
       cashFlow,
     } = elements || {};
 
-    const lastYear = balanceSheet['Total des passifs circulant'].length - 1;
+    const lastYear = balanceSheet["Total des passifs circulant"].length - 1;
     const growthRatesOnTurnover = getGrowthRateValues(
       incomeStatement["Chiffre d'affaires"]
     );
     const turnoverAverage = getAverage(incomeStatement["Chiffre d'affaires"]);
     const equityAverage = getAverage(
-      balanceSheet['Total des capitaux propres']
+      balanceSheet["Total des capitaux propres"]
     );
-    const resultsAverage = getAverage(incomeStatement['Résultat net']);
+    const resultsAverage = getAverage(incomeStatement["Résultat net"]);
     const resultsAverageBeforeFiscality = getAverage(
       incomeStatement["Résultat d'exploitation avant intérêts et impôts"]
     );
@@ -395,16 +395,16 @@ function getAllRatios(elements) {
       incomeStatement["Résultat brut d'exploitation"]
     );
     const growthRatesOnEquity = getGrowthRateValues(
-      balanceSheet['Total des capitaux propres']
+      balanceSheet["Total des capitaux propres"]
     );
     const growthRatesOnResults = getGrowthRateValues(
-      incomeStatement['Résultat net']
+      incomeStatement["Résultat net"]
     );
     const growthRatesOnEBE = getGrowthRateValues(
       incomeStatement["Résultat d'exploitation avant intérêts et impôts"]
     );
     const growthRatesOnAvailableCashFlow = getGrowthRateValues(
-      cashFlow['Flux tréso disponible']
+      cashFlow["Flux tréso disponible"]
     );
     const grossMarginRates = getRatesOnCriteria(
       incomeStatement["Chiffre d'affaires"],
@@ -412,53 +412,59 @@ function getAllRatios(elements) {
     );
     const marginRates = getRatesOnCriteria(
       incomeStatement["Chiffre d'affaires"],
-      incomeStatement['Résultat net']
+      incomeStatement["Résultat net"]
     );
     const ebeMarginRates = getRatesOnCriteria(
       incomeStatement["Chiffre d'affaires"],
       incomeStatement["Résultat d'exploitation avant intérêts et impôts"]
     );
     const roeRates = getRatesOnCriteria(
-      balanceSheet['Total des capitaux propres'],
-      incomeStatement['Résultat net']
+      balanceSheet["Total des capitaux propres"],
+      incomeStatement["Résultat net"]
     );
-    const roaRates = getRoa(incomeStatement['Résultat net'], balanceSheet);
+    const roaRates = getRoa(incomeStatement["Résultat net"], balanceSheet);
     const roceRates = getRoce(
       incomeStatement["Résultat d'exploitation avant intérêts et impôts"],
       balanceSheet
     );
 
     const equityRatio =
-      balanceSheet['Total des capitaux propres'][lastYear] /
+      balanceSheet["Total des capitaux propres"][lastYear] /
       balanceSheet["Total de l'actif"][lastYear];
     const per =
-      Number(parseFloat(price.replaceAll(',', '.')).toFixed(2)) /
-      incomeStatement['Dilué'][incomeStatement['Dilué'].length - 1];
+      Number(parseFloat(price.replaceAll(",", ".")).toFixed(2)) /
+      incomeStatement["Dilué"][incomeStatement["Dilué"].length - 1];
     const peg = per / (growthRatesOnResults.average * 100);
     const ltDebtsOnAssetRate =
-      balanceSheet['Dettes à long terme'][lastYear] /
+      balanceSheet["Dettes à long terme"][lastYear] /
       balanceSheet["Total de l'actif"][lastYear];
     const ltDebtsOnResultRate =
-      balanceSheet['Dettes à long terme'][lastYear] /
-      incomeStatement['Résultat net'][lastYear];
+      balanceSheet["Dettes à long terme"][lastYear] /
+      incomeStatement["Résultat net"][lastYear];
 
     const cashFlowOnTurnoverRate =
-      cashFlow['Flux tréso disponible'][lastYear] /
+      cashFlow["Flux tréso disponible"][lastYear] /
       incomeStatement["Chiffre d'affaires"][lastYear];
 
     const activeCashFlowRate =
       balanceSheet[
-        'Total trésorerie, quasi-trésorerie et placements à court terme'
+        "Total trésorerie, quasi-trésorerie et placements à court terme"
       ][lastYear] / balanceSheet["Total de l'actif"][lastYear];
     const debts =
-      balanceSheet['Dettes à long terme'][lastYear] +
-      balanceSheet['Dette courante'][lastYear] +
-      balanceSheet[
-        'Dettes fournisseurs'
-      ][lastYear];
+      balanceSheet["Dettes à long terme"][lastYear] === "-"
+        ? 0
+        : balanceSheet["Dettes à long terme"][lastYear] +
+            balanceSheet["Dette courante"][lastYear] ===
+          "-"
+        ? 0
+        : balanceSheet["Dette courante"][lastYear] +
+            balanceSheet["Dettes fournisseurs"][lastYear] ===
+          "-"
+        ? 0
+        : balanceSheet["Dettes fournisseurs"][lastYear];
 
     const gearing =
-      debts / balanceSheet['Total des capitaux propres'][lastYear];
+      debts / balanceSheet["Total des capitaux propres"][lastYear];
 
     const cashFlowProvidedByExploitationAverage = getAverage(
       cashFlow[
@@ -479,7 +485,7 @@ function getAllRatios(elements) {
     const cashFlowProvidedByInvestmentOnResultsRate =
       cashFlow[
         "Flux nets de trésorerie utilisés pour les activités d'investissement"
-      ][lastYear] / incomeStatement['Résultat net'][lastYear];
+      ][lastYear] / incomeStatement["Résultat net"][lastYear];
 
     return {
       turnoverAverage,
@@ -517,10 +523,10 @@ function getAllRatios(elements) {
   }
 }
 async function getRatioKeys(page) {
-  await page.waitForSelector('#LnkPage11', {
+  await page.waitForSelector("#LnkPage11", {
     visible: true,
   });
-  await page.click('#LnkPage11');
+  await page.click("#LnkPage11");
   const growRates = await getGrowthRates(page);
   const cashFlow = await getCashFlowRatio(Rpage);
   const financialHealth = await getFinancialHealth(page);
