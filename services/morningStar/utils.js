@@ -82,6 +82,7 @@ async function openBrowser() {
   return puppeteer.launch({
     ignoredHTTPSErrors: true,
     args: ["--no-sandbox"],
+    headless:true
   });
 }
 async function closeBrowser(browser) {
@@ -291,6 +292,7 @@ async function getIncomeStatement(page, cache, companyName) {
 async function getBalanceSheet(page, cache, companyName) {
   const cacheResult = cache.get(`${companyName}BalanceSheet`);
   if (cacheResult) {
+    console.log('toto')
     return cacheResult;
   }
   const result = await getTableData(page, "LnkPage10Viewbs");
@@ -427,12 +429,11 @@ function getAllRatios(elements) {
       incomeStatement["Résultat d'exploitation avant intérêts et impôts"],
       balanceSheet
     );
-
     const equityRatio =
       balanceSheet["Total des capitaux propres"][lastYear] /
       balanceSheet["Total de l'actif"][lastYear];
     const per =
-      Number(parseFloat(price.replaceAll(",", ".")).toFixed(2)) /
+      Number(parseFloat(price?.replaceAll(",", ".")).toFixed(2)) /
       incomeStatement["Dilué"][incomeStatement["Dilué"].length - 1];
     const peg = per / (growthRatesOnResults.average * 100);
     const ltDebtsOnAssetRate =
