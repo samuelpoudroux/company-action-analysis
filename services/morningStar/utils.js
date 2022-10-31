@@ -542,8 +542,7 @@ async function getKeyRatios(page, cache, companyName) {
       profits,
       financialHealth,
     };
-
-    cache.set(`${companyName}IncomeStatement`, keyRatios, 1000000000);
+    cache.set(`${companyName}getKeyRatios`, keyRatios, 1000000000);
     return keyRatios;
   }
   return cacheResult;
