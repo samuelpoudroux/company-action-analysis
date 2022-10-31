@@ -82,7 +82,8 @@ async function openBrowser() {
   return puppeteer.launch({
     ignoredHTTPSErrors: true,
     args: ["--no-sandbox"],
-    headless:true
+    headless: true,
+    timeout:0
   });
 }
 async function closeBrowser(browser) {
@@ -292,7 +293,7 @@ async function getIncomeStatement(page, cache, companyName) {
 async function getBalanceSheet(page, cache, companyName) {
   const cacheResult = cache.get(`${companyName}BalanceSheet`);
   if (cacheResult) {
-    console.log('toto')
+    console.log("toto");
     return cacheResult;
   }
   const result = await getTableData(page, "LnkPage10Viewbs");
@@ -523,21 +524,29 @@ function getAllRatios(elements) {
     throw new Error(error);
   }
 }
-async function getRatioKeys(page) {
-  await page.waitForSelector("#LnkPage11", {
-    visible: true,
-  });
-  await page.click("#LnkPage11");
-  const growRates = await getGrowthRates(page);
-  const cashFlow = await getCashFlowRatio(Rpage);
-  const financialHealth = await getFinancialHealth(page);
-  const profits = await getProfit(page);
-  return {
-    profits,
-    growRates,
-    cashFlow,
-    financialHealth,
-  };
+async function getKeyRatios(page, cache, companyName) {
+  const cacheResult = cache.get(`${companyName}getKeyRatios`);
+
+  if (!cacheResult) {
+    await page.waitForSelector("#LnkPage11", {
+      visible: true,
+    });
+    await page.click("#LnkPage11");
+    const growRates = await getGrowthRates(page);
+    const cashFlow = await getCashFlowRatio(page);
+    const financialHealth = await getFinancialHealth(page);
+    const profits = await getProfit(page);
+    const keyRatios = {
+      growRates,
+      cashFlow,
+      profits,
+      financialHealth,
+    };
+
+    cache.set(`${companyName}IncomeStatement`, keyRatios, 1000000000);
+    return keyRatios;
+  }
+  return cacheResult;
 }
 
 module.exports = {
@@ -549,7 +558,7 @@ module.exports = {
   getActionPrice,
   getActionVolume,
   getMarketCapitalisation,
-  getRatioKeys,
+  getKeyRatios,
   acceptCookies,
   getIncomeStatement,
   getBalanceSheet,

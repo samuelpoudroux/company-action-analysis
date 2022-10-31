@@ -6,7 +6,7 @@ const {
   getActionName,
   searchActionByName,
   acceptCookies,
-  getRatioKeys,
+  getKeyRatios,
   getActionPrice,
   getActionVolume,
   getMarketCapitalisation,
@@ -27,6 +27,11 @@ async function getMorningStarData(companyName) {
     let volume;
     let marketCapitalization;
     let browser;
+    let keyRatios;
+    let incomeStatement;
+    let balanceSheet;
+    let cashFlow;
+    let ratios;
     console.log("openBrowser");
     if (!cache.keys().find((e) => e.includes(companyName))) {
       browser = await openBrowser();
@@ -42,22 +47,25 @@ async function getMorningStarData(companyName) {
       volume = await getActionVolume(page);
       console.log("getMarketCapitalisation");
       marketCapitalization = await getMarketCapitalisation(page);
+      console.log("getIncomeStatement");
+      incomeStatement = await getIncomeStatement(page, cache, companyName);
+      console.log("getBalanceSheet");
+      balanceSheet = await getBalanceSheet(page, cache, companyName);
+      console.log("getCashFlow");
+      cashFlow = await getCashFlow(page, cache, companyName);
+      console.log("getKeyRatios");
+      keyRatios = await getKeyRatios(page, cache, companyName);
+      ratios = getAllRatios({
+        price,
+        volume,
+        marketCapitalization,
+        incomeStatement,
+        balanceSheet,
+        cashFlow,
+      });
     }
-    console.log("getIncomeStatement");
-    const incomeStatement = await getIncomeStatement(page, cache, companyName);
-    console.log("getBalanceSheet");
-    const balanceSheet = await getBalanceSheet(page, cache, companyName);
-    console.log("getCashFlow");
-    const cashFlow = await getCashFlow(page, cache, companyName);
     console.log("getAllRatios");
-    const ratios = getAllRatios({
-      price,
-      volume,
-      marketCapitalization,
-      incomeStatement,
-      balanceSheet,
-      cashFlow,
-    });
+    
 
     if (!cache.keys().find((e) => e.includes(companyName))) {
       await closeBrowser(browser);
@@ -70,6 +78,7 @@ async function getMorningStarData(companyName) {
       incomeStatement,
       balanceSheet,
       cashFlow,
+      keyRatios,
       ratios,
     };
   } catch (error) {
