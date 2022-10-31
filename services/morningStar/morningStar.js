@@ -19,8 +19,8 @@ const NodeCache = require("node-cache");
 
 const cache = new NodeCache();
 
-async function getMorningStarData(lowerCompanyName) {
-  const lowerCompanyName = lowerCompanyName.toLowerCase();
+async function getMorningStarData(companyName) {
+  const lowerCompanyName = companyName.toLowerCase();
   try {
     let page;
     let name;
