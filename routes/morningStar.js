@@ -26,4 +26,12 @@ router.get('/morningStar/companies/all',  (req, res) => {
   }
 });
 
+router.get('/morningStar/resetCache/reset',  (req, res) => {
+  try {
+    return res.json('success');
+  } catch (error) {
+    res.status(500);
+  }
+});
+
 module.exports = router;

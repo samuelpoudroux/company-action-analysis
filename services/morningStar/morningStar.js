@@ -17,7 +17,7 @@ const {
 } = require("./utils");
 const NodeCache = require("node-cache");
 
-const cache = new NodeCache();
+const cache = new NodeCache({stdTTL: 31556952  });
 
 async function getMorningStarData(companyName) {
   const lowerCompanyName = companyName.toLowerCase();
@@ -86,6 +86,11 @@ async function getMorningStarData(companyName) {
   }
 }
 
+
+const removeCache = () => {
+  console.log("removecahcCache")
+}
 module.exports = {
   getMorningStarData,
+  removeCache
 };

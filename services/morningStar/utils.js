@@ -286,7 +286,7 @@ async function getIncomeStatement(page, cache, companyName) {
     return cacheResult;
   }
   const result = await getTableData(page, "LnkPage10");
-  cache.set(`${companyName}IncomeStatement`, result, 1000000000);
+  cache.set(`${companyName}IncomeStatement`, result);
   return result;
 }
 
@@ -297,7 +297,7 @@ async function getBalanceSheet(page, cache, companyName) {
     return cacheResult;
   }
   const result = await getTableData(page, "LnkPage10Viewbs");
-  cache.set(`${companyName}BalanceSheet`, result, 1000000000);
+  cache.set(`${companyName}BalanceSheet`, result);
   return result;
 }
 
@@ -307,7 +307,7 @@ async function getCashFlow(page, cache, companyName) {
     return cacheResult;
   }
   const result = await getTableData(page, "LnkPage10Viewcf");
-  cache.set(`${companyName}CashFlow`, result, 1000000000);
+  cache.set(`${companyName}CashFlow`, result);
   return result;
 }
 
@@ -542,7 +542,7 @@ async function getKeyRatios(page, cache, companyName) {
       profits,
       financialHealth,
     };
-    cache.set(`${companyName}getKeyRatios`, keyRatios, 1000000000);
+    cache.set(`${companyName}getKeyRatios`, keyRatios);
     return keyRatios;
   }
   return cacheResult;
