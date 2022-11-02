@@ -17,7 +17,7 @@ const {
 } = require("./utils");
 const NodeCache = require("node-cache");
 
-const cache = new NodeCache({stdTTL: 31556952  });
+const cache = new NodeCache({ stdTTL: 31556952 });
 
 async function getMorningStarData(companyName) {
   const lowerCompanyName = companyName.toLowerCase();
@@ -86,11 +86,19 @@ async function getMorningStarData(companyName) {
   }
 }
 
-
+const removeCompanyOfCache = (companyName) => {
+  const filteredKeys = cache.keys().filter((e) => e.includes(companyName));
+  console.log("keys", cache.keys());
+  console.log("filteredKeys", filteredKeys);
+  return cache.del(filteredKeys);
+};
 const removeCache = () => {
-  console.log("removecahcCache")
-}
+  console.log("toto", cache.keys());
+  return cache.del(cache.keys());
+  console.log("removecahcCache");
+};
 module.exports = {
   getMorningStarData,
-  removeCache
+  removeCache,
+  removeCompanyOfCache
 };
