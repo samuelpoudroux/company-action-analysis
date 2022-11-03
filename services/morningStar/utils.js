@@ -10,7 +10,7 @@ const AdblockerPlugin = require("puppeteer-extra-plugin-adblocker");
 puppeteer.use(AdblockerPlugin({ blockTrackers: true }));
 
 async function goToPage(url, page) {
-  await page.goto(url, { waitUntil: "networkidle2" });
+  await page.goto(url, { waitUntil: "networkidle2", timeout: 0 });
 }
 
 async function acceptCookies(page) {
@@ -28,54 +28,67 @@ async function acceptCookies(page) {
 }
 
 async function getTableData(page, tabLink) {
-  await page.waitForSelector(`#${tabLink}`, {
-    visible: true,
-  });
+  try {
+    await page.waitForSelector(`#${tabLink}`, {
+      visible: true,
+    });
+    console.log("1");
+    const tab = await page.$(`#${tabLink}`);
+    await page.evaluate((el) => el.click(), tab);
+    console.log("2");
 
-  const tab = await page.$(`#${tabLink}`);
-  await page.evaluate((el) => el.click(), tab);
+    await page.waitForSelector("table.years5", {
+      visible: true,
+    });
+    console.log("3");
 
-  await page.waitForSelector("table.years5", {
-    visible: true,
-  });
+    const years = await page.$$eval("table.years5 > thead > tr > th", (ths) => {
+      return ths.map((th) => th.textContent);
+    });
+    console.log("4");
 
-  const years = await page.$$eval("table.years5 > thead > tr > th", (ths) => {
-    return ths.map((th) => th.textContent);
-  });
+    const treatedYears = _.uniq(years);
+    treatedYears.shift();
+    years.shift();
 
-  const treatedYears = _.uniq(years);
-  treatedYears.shift();
-  years.shift();
-
-  const dataThs = await page.$$eval("table.years5 tbody th[headers]", (tds) => {
-    return tds.map((td) => td.textContent);
-  });
-
-  const dataTds = await page.$$eval("table.years5 tbody td", (tds) => {
-    return tds.map((td) => {
-      const convertData = td.textContent
-        .replaceAll(/\s/g, "")
-        .replace(/,/g, ".");
-      if (!isNaN(convertData)) {
-        return Number(parseFloat(convertData).toFixed(2));
+    const dataThs = await page.$$eval(
+      "table.years5 tbody th[headers]",
+      (tds) => {
+        return tds.map((td) => td.textContent);
       }
-      return td.textContent;
+    );
+    console.log("5");
+
+    const dataTds = await page.$$eval("table.years5 tbody td", (tds) => {
+      return tds.map((td) => {
+        const convertData = td.textContent
+          .replaceAll(/\s/g, "")
+          .replace(/,/g, ".");
+        if (!isNaN(convertData)) {
+          return Number(parseFloat(convertData).toFixed(2));
+        }
+        return td.textContent;
+      });
     });
-  });
+    console.log("6");
 
-  const dataByTableRow = _.chunk(dataTds, treatedYears.length);
+    const dataByTableRow = _.chunk(dataTds, treatedYears.length);
 
-  let finalData = {
-    years: treatedYears,
-  };
+    let finalData = {
+      years: treatedYears,
+    };
 
-  dataThs
-    .map((e) => e)
-    .forEach((key, index) => {
-      finalData[key] = dataByTableRow[index];
-    });
+    dataThs
+      .map((e) => e)
+      .forEach((key, index) => {
+        finalData[key] = dataByTableRow[index];
+      });
 
-  return finalData;
+    return finalData;
+  } catch (error) {
+    console.log(`error has occured in getTableData`, error);
+    throw error;
+  }
 }
 
 async function openBrowser() {
@@ -99,6 +112,7 @@ async function searchActionByName(page, value) {
     await page.waitForSelector("#quoteSearch", {
       visible: true,
     });
+
     await page.click("#quoteSearch");
     await page.type("#quoteSearch", value, { delay: 700 });
     await page.waitForSelector(".ac_results  .ac_over", {
@@ -106,7 +120,7 @@ async function searchActionByName(page, value) {
     });
     await page.click(".ac_results  .ac_over");
   } catch (error) {
-    console.log(`error has occured in searchActionByName`);
+    console.log(`error has occured in searchActionByName`, error);
   }
 }
 async function getActionName(page) {
@@ -119,7 +133,7 @@ async function getActionName(page) {
       () => document.querySelector(".securityName").innerText
     );
   } catch (error) {
-    console.log(`error has occured in getActionName`);
+    console.log(`error has occured in getActionName`, error);
     throw error;
   }
 }
@@ -128,10 +142,11 @@ async function getActionPrice(page) {
   try {
     await page.waitForSelector(".price", {
       visible: true,
+      timeout: 0,
     });
     return page.evaluate(() => document.querySelector("span.price").innerText);
   } catch (error) {
-    console.log(`error has occured in getActionPrice`);
+    console.log(`error has occured in getActionPrice`, error);
     throw error;
   }
 }
@@ -139,12 +154,13 @@ async function getActionVolume(page) {
   try {
     await page.waitForSelector("#Col0DayVolume", {
       visible: true,
+      timeout: 0,
     });
     return page.evaluate(
       () => document.querySelector("#Col0DayVolume").innerText
     );
   } catch (error) {
-    console.log(`error has occured in getActionVolume`);
+    console.log(`error has occured in getActionVolume`, error);
     throw error;
   }
 }
@@ -155,7 +171,7 @@ async function getMarketCapitalisation(page) {
     });
     return page.evaluate(() => document.querySelector("#Col0MCap").innerText);
   } catch (error) {
-    console.log(`error has occured in getMarketCapitalisation`);
+    console.log(`error has occured in getMarketCapitalisation`, error);
     throw error;
   }
 }
@@ -200,7 +216,7 @@ async function getGrowthRates(page) {
       },
     };
   } catch (error) {
-    console.log(`error has occured in getGrowthRate`);
+    console.log(`error has occured in getGrowthRate`, error);
     throw error;
   }
 }
@@ -234,7 +250,7 @@ async function getCashFlowRatio(page) {
       cashFlowPercentageAvailableOnNetResult: cashFlowDataByTableRow[4],
     };
   } catch (error) {
-    console.log(`error has occured in getCashFlowRatio`);
+    console.log(`error has occured in getCashFlowRatio`, error);
     throw error;
   }
 }
@@ -282,7 +298,7 @@ async function getFinancialHealth(page) {
       financialLeverage: financialHealthDataByTableRow[22],
     };
   } catch (error) {
-    console.log(`error has occured in getFinancialHealth`);
+    console.log(`error has occured in getFinancialHealth`, error);
     throw error;
   }
 }
@@ -340,9 +356,10 @@ async function getIncomeStatement(page, cache, companyName) {
     cache.set(`${companyName}IncomeStatement`, result);
     return result;
   } catch (error) {
-    console.log(`error has occured in getIncomeStatement`);
+    console.log(`error has occured in getIncomeStatement`, error);
     throw error;
   }
+  return [];
 }
 
 async function getBalanceSheet(page, cache, companyName) {
@@ -356,7 +373,7 @@ async function getBalanceSheet(page, cache, companyName) {
     cache.set(`${companyName}BalanceSheet`, result);
     return result;
   } catch (error) {
-    console.log(`error has occured in getBalanceSheet`);
+    console.log(`error has occured in getBalanceSheet`, error);
     throw error;
   }
 }
@@ -371,7 +388,7 @@ async function getCashFlow(page, cache, companyName) {
     cache.set(`${companyName}CashFlow`, result);
     return result;
   } catch (error) {
-    console.log(`error has occured in getCashFlow`);
+    console.log(`error has occured in getCashFlow`, error);
     throw error;
   }
 }
@@ -582,7 +599,7 @@ function getAllRatios(elements) {
       cashFlowProvidedByInvestmentOnResultsRate,
     };
   } catch (error) {
-    console.log(`error has occured in getAllRatios`);
+    console.log(`error has occured in getAllRatios`, error);
     throw error;
   }
 }
@@ -610,7 +627,7 @@ async function getKeyRatios(page, cache, companyName) {
     }
     return cacheResult;
   } catch (error) {
-    console.log(`error has occured in getKeyRatios`);
+    console.log(`error has occured in getKeyRatios`, error);
     throw error;
   }
 }
