@@ -58,8 +58,9 @@ async function getMorningStarData(companyName) {
     console.log("getKeyRatios");
     keyRatios = await getKeyRatios(page, cache, lowerCompanyName);
     console.log("getAllRatios");
-    await closeBrowser(browser);
-
+    if (!cache.keys().find((e) => e.includes(lowerCompanyName))) {
+      await closeBrowser(browser);
+    }
 
     ratios = getAllRatios({
       price,
