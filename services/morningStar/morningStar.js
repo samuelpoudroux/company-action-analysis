@@ -48,6 +48,7 @@ async function getMorningStarData(companyName) {
       volume = await getActionVolume(page);
       console.log("getMarketCapitalisation");
       marketCapitalization = await getMarketCapitalisation(page);
+      await closeBrowser(browser);
     }
     console.log("getIncomeStatement");
     incomeStatement = await getIncomeStatement(page, cache, lowerCompanyName);
@@ -58,6 +59,7 @@ async function getMorningStarData(companyName) {
     console.log("getKeyRatios");
     keyRatios = await getKeyRatios(page, cache, lowerCompanyName);
     console.log("getAllRatios");
+
     ratios = getAllRatios({
       price,
       volume,
@@ -67,9 +69,6 @@ async function getMorningStarData(companyName) {
       cashFlow,
     });
 
-    if (!cache.keys().find((e) => e.includes(lowerCompanyName))) {
-      await closeBrowser(browser);
-    }
     return {
       name,
       price,
@@ -83,7 +82,7 @@ async function getMorningStarData(companyName) {
     };
   } catch (error) {
     console.log("getMorningStarData", error);
-    throw error
+    throw error;
   }
 }
 
@@ -101,5 +100,5 @@ const removeCache = () => {
 module.exports = {
   getMorningStarData,
   removeCache,
-  removeCompanyOfCache
+  removeCompanyOfCache,
 };

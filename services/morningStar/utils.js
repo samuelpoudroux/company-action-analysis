@@ -79,27 +79,35 @@ async function getTableData(page, tabLink) {
 }
 
 async function openBrowser() {
-  return await puppeteer.launch({
-    ignoredHTTPSErrors: true,
-    args: ["--no-sandbox"],
-    headless: true,
-    timeout: 0,
-  });
+  try {
+    return await puppeteer.launch({
+      ignoredHTTPSErrors: true,
+      args: ["--no-sandbox"],
+      headless: true,
+      timeout: 0,
+    });
+  } catch (error) {
+    console.log(`error has occured in openBrowser`);
+  }
 }
 async function closeBrowser(browser) {
   await browser.close();
 }
 
 async function searchActionByName(page, value) {
-  await page.waitForSelector("#quoteSearch", {
-    visible: true,
-  });
-  await page.click("#quoteSearch");
-  await page.type("#quoteSearch", value, { delay: 700 });
-  await page.waitForSelector(".ac_results  .ac_over", {
-    visible: true,
-  });
-  await page.click(".ac_results  .ac_over");
+  try {
+    await page.waitForSelector("#quoteSearch", {
+      visible: true,
+    });
+    await page.click("#quoteSearch");
+    await page.type("#quoteSearch", value, { delay: 700 });
+    await page.waitForSelector(".ac_results  .ac_over", {
+      visible: true,
+    });
+    await page.click(".ac_results  .ac_over");
+  } catch (error) {
+    console.log(`error has occured in searchActionByName`);
+  }
 }
 async function getActionName(page) {
   try {
@@ -111,6 +119,7 @@ async function getActionName(page) {
       () => document.querySelector(".securityName").innerText
     );
   } catch (error) {
+    console.log(`error has occured in getActionName`);
     throw error;
   }
 }
@@ -122,6 +131,7 @@ async function getActionPrice(page) {
     });
     return page.evaluate(() => document.querySelector("span.price").innerText);
   } catch (error) {
+    console.log(`error has occured in getActionPrice`);
     throw error;
   }
 }
@@ -134,6 +144,7 @@ async function getActionVolume(page) {
       () => document.querySelector("#Col0DayVolume").innerText
     );
   } catch (error) {
+    console.log(`error has occured in getActionVolume`);
     throw error;
   }
 }
@@ -144,6 +155,7 @@ async function getMarketCapitalisation(page) {
     });
     return page.evaluate(() => document.querySelector("#Col0MCap").innerText);
   } catch (error) {
+    console.log(`error has occured in getMarketCapitalisation`);
     throw error;
   }
 }
@@ -188,6 +200,7 @@ async function getGrowthRates(page) {
       },
     };
   } catch (error) {
+    console.log(`error has occured in getGrowthRate`);
     throw error;
   }
 }
@@ -221,6 +234,7 @@ async function getCashFlowRatio(page) {
       cashFlowPercentageAvailableOnNetResult: cashFlowDataByTableRow[4],
     };
   } catch (error) {
+    console.log(`error has occured in getCashFlowRatio`);
     throw error;
   }
 }
@@ -268,6 +282,7 @@ async function getFinancialHealth(page) {
       financialLeverage: financialHealthDataByTableRow[22],
     };
   } catch (error) {
+    console.log(`error has occured in getFinancialHealth`);
     throw error;
   }
 }
@@ -310,6 +325,7 @@ async function getProfit(page) {
       returnsOnEquity: profitDataByTableRow[12],
     };
   } catch (error) {
+    console.log(`error has occured in getProfit`);
     throw error;
   }
 }
@@ -324,6 +340,7 @@ async function getIncomeStatement(page, cache, companyName) {
     cache.set(`${companyName}IncomeStatement`, result);
     return result;
   } catch (error) {
+    console.log(`error has occured in getIncomeStatement`);
     throw error;
   }
 }
@@ -339,6 +356,7 @@ async function getBalanceSheet(page, cache, companyName) {
     cache.set(`${companyName}BalanceSheet`, result);
     return result;
   } catch (error) {
+    console.log(`error has occured in getBalanceSheet`);
     throw error;
   }
 }
@@ -353,6 +371,7 @@ async function getCashFlow(page, cache, companyName) {
     cache.set(`${companyName}CashFlow`, result);
     return result;
   } catch (error) {
+    console.log(`error has occured in getCashFlow`);
     throw error;
   }
 }
@@ -379,13 +398,9 @@ function getGrowthRateValues(results) {
 }
 
 function getRatesOnCriteria(criterias, values) {
-  try {
-    return values?.map((value, index) => {
-      return value / criterias[index];
-    });
-  } catch (error) {
-    console.log("error", error);
-  }
+  return values?.map((value, index) => {
+    return value / criterias[index];
+  });
 }
 
 function getRoce(ebits, balanceSheet) {
@@ -567,7 +582,8 @@ function getAllRatios(elements) {
       cashFlowProvidedByInvestmentOnResultsRate,
     };
   } catch (error) {
-    throw new Error(error);
+    console.log(`error has occured in getAllRatios`);
+    throw error;
   }
 }
 async function getKeyRatios(page, cache, companyName) {
@@ -594,6 +610,7 @@ async function getKeyRatios(page, cache, companyName) {
     }
     return cacheResult;
   } catch (error) {
+    console.log(`error has occured in getKeyRatios`);
     throw error;
   }
 }
