@@ -15,7 +15,7 @@ router.get("/morningStar/:companyName", async (req, res) => {
       res.status(400).send("le Nom de la company est requis");
     }
   } catch (error) {
-    res.status(500).json(error);
+    res.status(500).send('error has occured');
   }
 });
 
@@ -37,7 +37,7 @@ router.get("/morningStar/cache/:companyName", (req, res) => {
     }
     return res.json("success");
   } catch (error) {
-    res.status(500);
+    res.status(500).send('error has occured', JSON.stringify(error));
   }
 });
 
