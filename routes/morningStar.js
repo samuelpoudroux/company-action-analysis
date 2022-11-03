@@ -15,7 +15,7 @@ router.get("/morningStar/:companyName", async (req, res) => {
       res.status(400).send("le Nom de la company est requis");
     }
   } catch (error) {
-    res.status(500);
+    res.status(500).json(error);
   }
 });
 
