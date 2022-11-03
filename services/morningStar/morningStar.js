@@ -83,6 +83,7 @@ async function getMorningStarData(companyName) {
     };
   } catch (error) {
     console.log("getMorningStarData", error);
+    throw error
   }
 }
 

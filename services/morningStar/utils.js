@@ -83,7 +83,7 @@ async function openBrowser() {
     ignoredHTTPSErrors: true,
     args: ["--no-sandbox"],
     headless: true,
-    timeout:0
+    timeout: 0,
   });
 }
 async function closeBrowser(browser) {
@@ -102,213 +102,259 @@ async function searchActionByName(page, value) {
   await page.click(".ac_results  .ac_over");
 }
 async function getActionName(page) {
-  await page.waitForSelector(".securityName", {
-    visible: true,
-  });
+  try {
+    await page.waitForSelector(".securityName", {
+      visible: true,
+    });
 
-  return page.evaluate(() => document.querySelector(".securityName").innerText);
+    return page.evaluate(
+      () => document.querySelector(".securityName").innerText
+    );
+  } catch (error) {
+    throw error;
+  }
 }
 
 async function getActionPrice(page) {
-  await page.waitForSelector(".price", {
-    visible: true,
-  });
-  return page.evaluate(() => document.querySelector("span.price").innerText);
+  try {
+    await page.waitForSelector(".price", {
+      visible: true,
+    });
+    return page.evaluate(() => document.querySelector("span.price").innerText);
+  } catch (error) {
+    throw error;
+  }
 }
 async function getActionVolume(page) {
-  await page.waitForSelector("#Col0DayVolume", {
-    visible: true,
-  });
-  return page.evaluate(
-    () => document.querySelector("#Col0DayVolume").innerText
-  );
+  try {
+    await page.waitForSelector("#Col0DayVolume", {
+      visible: true,
+    });
+    return page.evaluate(
+      () => document.querySelector("#Col0DayVolume").innerText
+    );
+  } catch (error) {
+    throw error;
+  }
 }
 async function getMarketCapitalisation(page) {
-  await page.waitForSelector("#Col0MCap", {
-    visible: true,
-  });
-  return page.evaluate(() => document.querySelector("#Col0MCap").innerText);
+  try {
+    await page.waitForSelector("#Col0MCap", {
+      visible: true,
+    });
+    return page.evaluate(() => document.querySelector("#Col0MCap").innerText);
+  } catch (error) {
+    throw error;
+  }
 }
 
 async function getGrowthRates(page) {
   // go to growthRateTabs----------
-  await page.waitForSelector("#LnkPage11Viewgr", {
-    visible: true,
-  });
+  try {
+    await page.waitForSelector("#LnkPage11Viewgr", {
+      visible: true,
+    });
 
-  const growthRateTab = await page.$("#LnkPage11Viewgr");
-  await page.evaluate((el) => el.click(), growthRateTab);
+    const growthRateTab = await page.$("#LnkPage11Viewgr");
+    await page.evaluate((el) => el.click(), growthRateTab);
 
-  await page.waitForSelector("table.years5", {
-    visible: true,
-  });
-  const years = await page.$$eval("table.years5 > thead > tr > th", (ths) => {
-    return ths.map((th) => th.textContent);
-  });
-  years.shift();
-  const growthData = await page.$$eval("table.years5 tbody td", (tds) => {
-    return tds.map((td) => td.textContent);
-  });
-  const growDataByTableRow = _.chunk(growthData, years.length);
+    await page.waitForSelector("table.years5", {
+      visible: true,
+    });
+    const years = await page.$$eval("table.years5 > thead > tr > th", (ths) => {
+      return ths.map((th) => th.textContent);
+    });
+    years.shift();
+    const growthData = await page.$$eval("table.years5 tbody td", (tds) => {
+      return tds.map((td) => td.textContent);
+    });
+    const growDataByTableRow = _.chunk(growthData, years.length);
 
-  return {
-    recipeGrowth: {
-      oneYearAverage: growDataByTableRow[0],
-      threeYearAverage: growDataByTableRow[1],
-      fiveYearAverage: growDataByTableRow[2],
-    },
-    operatingResult: {
-      oneYearAverage: growDataByTableRow[3],
-      threeYearAverage: growDataByTableRow[4],
-      fiveYearAverage: growDataByTableRow[5],
-    },
-    profitByAction: {
-      oneYearAverage: growDataByTableRow[6],
-      threeYearAverage: growDataByTableRow[7],
-      fiveYearAverage: growDataByTableRow[8],
-    },
-  };
+    return {
+      recipeGrowth: {
+        oneYearAverage: growDataByTableRow[0],
+        threeYearAverage: growDataByTableRow[1],
+        fiveYearAverage: growDataByTableRow[2],
+      },
+      operatingResult: {
+        oneYearAverage: growDataByTableRow[3],
+        threeYearAverage: growDataByTableRow[4],
+        fiveYearAverage: growDataByTableRow[5],
+      },
+      profitByAction: {
+        oneYearAverage: growDataByTableRow[6],
+        threeYearAverage: growDataByTableRow[7],
+        fiveYearAverage: growDataByTableRow[8],
+      },
+    };
+  } catch (error) {
+    throw error;
+  }
 }
 
 async function getCashFlowRatio(page) {
-  await page.waitForSelector("#LnkPage11Viewcf", {
-    visible: true,
-  });
+  try {
+    await page.waitForSelector("#LnkPage11Viewcf", {
+      visible: true,
+    });
 
-  const cashFlowTab = await page.$("#LnkPage11Viewcf");
-  await page.evaluate((el) => el.click(), cashFlowTab);
+    const cashFlowTab = await page.$("#LnkPage11Viewcf");
+    await page.evaluate((el) => el.click(), cashFlowTab);
 
-  await page.waitForSelector("table.years5", {
-    visible: true,
-  });
-  const years = await page.$$eval("table.years5 > thead > tr > th", (ths) => {
-    return ths.map((th) => th.textContent);
-  });
-  years.shift();
-  const cashFlowData = await page.$$eval("table.years5 tbody td", (tds) => {
-    return tds.map((td) => td.textContent);
-  });
-  const cashFlowDataByTableRow = _.chunk(cashFlowData, years.length);
+    await page.waitForSelector("table.years5", {
+      visible: true,
+    });
+    const years = await page.$$eval("table.years5 > thead > tr > th", (ths) => {
+      return ths.map((th) => th.textContent);
+    });
+    years.shift();
+    const cashFlowData = await page.$$eval("table.years5 tbody td", (tds) => {
+      return tds.map((td) => td.textContent);
+    });
+    const cashFlowDataByTableRow = _.chunk(cashFlowData, years.length);
 
-  return {
-    operationalCashFlowGrowth: cashFlowDataByTableRow[0],
-    cashFlowGrowth: cashFlowDataByTableRow[1],
-    investmentPercentageOnSales: cashFlowDataByTableRow[2],
-    cashFlowPercentageAvailableOnSales: cashFlowDataByTableRow[3],
-    cashFlowPercentageAvailableOnNetResult: cashFlowDataByTableRow[4],
-  };
+    return {
+      operationalCashFlowGrowth: cashFlowDataByTableRow[0],
+      cashFlowGrowth: cashFlowDataByTableRow[1],
+      investmentPercentageOnSales: cashFlowDataByTableRow[2],
+      cashFlowPercentageAvailableOnSales: cashFlowDataByTableRow[3],
+      cashFlowPercentageAvailableOnNetResult: cashFlowDataByTableRow[4],
+    };
+  } catch (error) {
+    throw error;
+  }
 }
 
 async function getFinancialHealth(page) {
-  await page.waitForSelector("#LnkPage11Viewfh", {
-    visible: true,
-  });
+  try {
+    await page.waitForSelector("#LnkPage11Viewfh", {
+      visible: true,
+    });
 
-  const financialHealthTab = await page.$("#LnkPage11Viewfh");
-  await page.evaluate((el) => el.click(), financialHealthTab);
+    const financialHealthTab = await page.$("#LnkPage11Viewfh");
+    await page.evaluate((el) => el.click(), financialHealthTab);
 
-  await page.waitForSelector("table.years5", {
-    visible: true,
-  });
-  const years = await page.$$eval("table.years5 > thead > tr > th", (ths) => {
-    return ths.map((th) => th.textContent);
-  });
-  const treatedYears = _.uniq(years);
-  treatedYears.shift();
+    await page.waitForSelector("table.years5", {
+      visible: true,
+    });
+    const years = await page.$$eval("table.years5 > thead > tr > th", (ths) => {
+      return ths.map((th) => th.textContent);
+    });
+    const treatedYears = _.uniq(years);
+    treatedYears.shift();
 
-  const financialHealthData = await page.$$eval(
-    "table.years5 tbody td",
-    (tds) => {
-      return tds.map((td) => td.textContent);
-    }
-  );
-  const financialHealthDataByTableRow = _.chunk(
-    financialHealthData,
-    treatedYears.length
-  );
+    const financialHealthData = await page.$$eval(
+      "table.years5 tbody td",
+      (tds) => {
+        return tds.map((td) => td.textContent);
+      }
+    );
+    const financialHealthDataByTableRow = _.chunk(
+      financialHealthData,
+      treatedYears.length
+    );
 
-  return {
-    cashShortTermInvestments: financialHealthDataByTableRow[0],
-    receivables: financialHealthDataByTableRow[1],
-    currentAssetTotal: financialHealthDataByTableRow[4],
-    supplierDebts: financialHealthDataByTableRow[9],
-    currentDebt: financialHealthDataByTableRow[10],
-    currentLiabilityTotal: financialHealthDataByTableRow[14],
-    ltDebts: financialHealthDataByTableRow[15],
-    equityTotal: financialHealthDataByTableRow[18],
-    liquidityRatio: financialHealthDataByTableRow[20],
-    quickRatio: financialHealthDataByTableRow[21],
-    financialLeverage: financialHealthDataByTableRow[22],
-  };
+    return {
+      cashShortTermInvestments: financialHealthDataByTableRow[0],
+      receivables: financialHealthDataByTableRow[1],
+      currentAssetTotal: financialHealthDataByTableRow[4],
+      supplierDebts: financialHealthDataByTableRow[9],
+      currentDebt: financialHealthDataByTableRow[10],
+      currentLiabilityTotal: financialHealthDataByTableRow[14],
+      ltDebts: financialHealthDataByTableRow[15],
+      equityTotal: financialHealthDataByTableRow[18],
+      liquidityRatio: financialHealthDataByTableRow[20],
+      quickRatio: financialHealthDataByTableRow[21],
+      financialLeverage: financialHealthDataByTableRow[22],
+    };
+  } catch (error) {
+    throw error;
+  }
 }
 
 async function getProfit(page) {
-  await page.waitForSelector("#LnkPage11Viewpr", {
-    visible: true,
-  });
+  try {
+    await page.waitForSelector("#LnkPage11Viewpr", {
+      visible: true,
+    });
 
-  const performance = await page.$("#LnkPage11Viewpr");
-  await page.evaluate((el) => el.click(), performance);
+    const performance = await page.$("#LnkPage11Viewpr");
+    await page.evaluate((el) => el.click(), performance);
 
-  await page.waitForSelector("table.years5", {
-    visible: true,
-  });
+    await page.waitForSelector("table.years5", {
+      visible: true,
+    });
 
-  const years = await page.$$eval("table.years5 > thead > tr > th", (ths) => {
-    return ths.map((th) => th.textContent);
-  });
+    const years = await page.$$eval("table.years5 > thead > tr > th", (ths) => {
+      return ths.map((th) => th.textContent);
+    });
 
-  const treatedYears = _.uniq(years);
-  treatedYears.shift();
-  years.shift();
+    const treatedYears = _.uniq(years);
+    treatedYears.shift();
+    years.shift();
 
-  const profitData = await page.$$eval("table.years5 tbody td", (tds) => {
-    return tds.map((td) => td.textContent);
-  });
+    const profitData = await page.$$eval("table.years5 tbody td", (tds) => {
+      return tds.map((td) => td.textContent);
+    });
 
-  const profitDataByTableRow = _.chunk(profitData, treatedYears.length);
+    const profitDataByTableRow = _.chunk(profitData, treatedYears.length);
 
-  return {
-    receipCost: profitDataByTableRow[1],
-    grossProfitDataMargin: profitDataByTableRow[2],
-    operatingProfitData: profitDataByTableRow[5],
-    ebtMarge: profitDataByTableRow[7],
-    netMarge: profitDataByTableRow[9],
-    activeReturnOnInvestment: profitDataByTableRow[10],
-    financialLeverage: profitDataByTableRow[11],
-    returnsOnEquity: profitDataByTableRow[12],
-  };
+    return {
+      receipCost: profitDataByTableRow[1],
+      grossProfitDataMargin: profitDataByTableRow[2],
+      operatingProfitData: profitDataByTableRow[5],
+      ebtMarge: profitDataByTableRow[7],
+      netMarge: profitDataByTableRow[9],
+      activeReturnOnInvestment: profitDataByTableRow[10],
+      financialLeverage: profitDataByTableRow[11],
+      returnsOnEquity: profitDataByTableRow[12],
+    };
+  } catch (error) {
+    throw error;
+  }
 }
 
 async function getIncomeStatement(page, cache, companyName) {
-  const cacheResult = cache.get(`${companyName}IncomeStatement`);
-  if (cacheResult) {
-    return cacheResult;
+  try {
+    const cacheResult = cache.get(`${companyName}IncomeStatement`);
+    if (cacheResult) {
+      return cacheResult;
+    }
+    const result = await getTableData(page, "LnkPage10");
+    cache.set(`${companyName}IncomeStatement`, result);
+    return result;
+  } catch (error) {
+    throw error;
   }
-  const result = await getTableData(page, "LnkPage10");
-  cache.set(`${companyName}IncomeStatement`, result);
-  return result;
 }
 
 async function getBalanceSheet(page, cache, companyName) {
-  const cacheResult = cache.get(`${companyName}BalanceSheet`);
-  if (cacheResult) {
-    console.log("toto");
-    return cacheResult;
+  try {
+    const cacheResult = cache.get(`${companyName}BalanceSheet`);
+    if (cacheResult) {
+      console.log("toto");
+      return cacheResult;
+    }
+    const result = await getTableData(page, "LnkPage10Viewbs");
+    cache.set(`${companyName}BalanceSheet`, result);
+    return result;
+  } catch (error) {
+    throw error;
   }
-  const result = await getTableData(page, "LnkPage10Viewbs");
-  cache.set(`${companyName}BalanceSheet`, result);
-  return result;
 }
 
 async function getCashFlow(page, cache, companyName) {
-  const cacheResult = cache.get(`${companyName}CashFlow`);
-  if (cacheResult) {
-    return cacheResult;
+  try {
+    const cacheResult = cache.get(`${companyName}CashFlow`);
+    if (cacheResult) {
+      return cacheResult;
+    }
+    const result = await getTableData(page, "LnkPage10Viewcf");
+    cache.set(`${companyName}CashFlow`, result);
+    return result;
+  } catch (error) {
+    throw error;
   }
-  const result = await getTableData(page, "LnkPage10Viewcf");
-  cache.set(`${companyName}CashFlow`, result);
-  return result;
 }
 
 function getTotalOfArray(values) {
@@ -525,27 +571,31 @@ function getAllRatios(elements) {
   }
 }
 async function getKeyRatios(page, cache, companyName) {
-  const cacheResult = cache.get(`${companyName}getKeyRatios`);
+  try {
+    const cacheResult = cache.get(`${companyName}getKeyRatios`);
 
-  if (!cacheResult) {
-    await page.waitForSelector("#LnkPage11", {
-      visible: true,
-    });
-    await page.click("#LnkPage11");
-    const growRates = await getGrowthRates(page);
-    const cashFlow = await getCashFlowRatio(page);
-    const financialHealth = await getFinancialHealth(page);
-    const profits = await getProfit(page);
-    const keyRatios = {
-      growRates,
-      cashFlow,
-      profits,
-      financialHealth,
-    };
-    cache.set(`${companyName}getKeyRatios`, keyRatios);
-    return keyRatios;
+    if (!cacheResult) {
+      await page.waitForSelector("#LnkPage11", {
+        visible: true,
+      });
+      await page.click("#LnkPage11");
+      const growRates = await getGrowthRates(page);
+      const cashFlow = await getCashFlowRatio(page);
+      const financialHealth = await getFinancialHealth(page);
+      const profits = await getProfit(page);
+      const keyRatios = {
+        growRates,
+        cashFlow,
+        profits,
+        financialHealth,
+      };
+      cache.set(`${companyName}getKeyRatios`, keyRatios);
+      return keyRatios;
+    }
+    return cacheResult;
+  } catch (error) {
+    throw error;
   }
-  return cacheResult;
 }
 
 module.exports = {
