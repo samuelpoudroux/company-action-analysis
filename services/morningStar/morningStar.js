@@ -33,6 +33,7 @@ async function getMorningStarData(companyName) {
     let balanceSheet;
     let cashFlow;
     let ratios;
+    console.log("cache", cache.keys());
     console.log("openBrowser");
     if (!cache.keys().find((e) => e.includes(lowerCompanyName))) {
       browser = await openBrowser();
