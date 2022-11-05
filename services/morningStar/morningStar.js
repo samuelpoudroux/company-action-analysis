@@ -35,7 +35,7 @@ async function getMorningStarData(companyName) {
     let ratios;
     console.log("cache", cache.keys());
     console.log("openBrowser");
-    if (!cache.keys().find((e) => e.includes(lowerCompanyName))) {
+    // if (!cache.keys().find((e) => e.includes(lowerCompanyName))) {
       browser = await openBrowser();
       page = await browser.newPage();
       await goToPage(MORNING_STAR_URL, page);
@@ -49,7 +49,7 @@ async function getMorningStarData(companyName) {
       volume = await getActionVolume(page);
       console.log("getMarketCapitalisation");
       marketCapitalization = await getMarketCapitalisation(page);
-    }
+    // }
     console.log("getIncomeStatement");
     incomeStatement = await getIncomeStatement(page, cache, lowerCompanyName);
     console.log("getBalanceSheet");
