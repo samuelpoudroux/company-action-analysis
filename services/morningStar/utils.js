@@ -104,7 +104,7 @@ async function openBrowser() {
     return await puppeteer.launch({
       ignoredHTTPSErrors: true,
       args: ["--no-sandbox"],
-      headless: false,
+      headless: true,
       timeout: 0,
     });
   } catch (error) {
