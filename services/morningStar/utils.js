@@ -10,20 +10,28 @@ const AdblockerPlugin = require("puppeteer-extra-plugin-adblocker");
 puppeteer.use(AdblockerPlugin({ blockTrackers: true }));
 
 async function goToPage(url, page) {
-  await page.goto(url, { waitUntil: "networkidle2", timeout: 0 });
+  try {
+    await page.goto(url, { waitUntil: "networkidle2", timeout: 0 });
+  } catch (error) {
+    throw error
+  }
 }
 
 async function acceptCookies(page) {
-  // is existing individual input
-  const existingIndividualInput = await page.waitForSelector(
-    "#btn_individual",
-    {
-      visible: true,
+  try {
+    // is existing individual input
+    const existingIndividualInput = await page.waitForSelector(
+      "#btn_individual",
+      {
+        visible: true,
+      }
+    );
+  
+    if (existingIndividualInput) {
+      return page.click("#btn_individual");
     }
-  );
-
-  if (existingIndividualInput) {
-    return page.click("#btn_individual");
+  } catch (error) {
+    throw error
   }
 }
 
@@ -96,7 +104,7 @@ async function openBrowser() {
     return await puppeteer.launch({
       ignoredHTTPSErrors: true,
       args: ["--no-sandbox"],
-      headless: true,
+      headless: false,
       timeout: 0,
     });
   } catch (error) {
@@ -104,7 +112,12 @@ async function openBrowser() {
   }
 }
 async function closeBrowser(browser) {
-  await browser.close();
+  try {
+    
+    await browser.close();
+  } catch (error) {
+    console.log('error', "erro while closing browser")
+  }
 }
 
 async function searchActionByName(page, value) {
@@ -359,14 +372,12 @@ async function getIncomeStatement(page, cache, companyName) {
     console.log(`error has occured in getIncomeStatement`, error);
     throw error;
   }
-  return [];
 }
 
 async function getBalanceSheet(page, cache, companyName) {
   try {
     const cacheResult = cache.get(`${companyName}BalanceSheet`);
     if (cacheResult) {
-      console.log("toto");
       return cacheResult;
     }
     const result = await getTableData(page, "LnkPage10Viewbs");
