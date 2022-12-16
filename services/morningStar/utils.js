@@ -1,6 +1,44 @@
 const _ = require("lodash");
 const puppeteer = require("puppeteer-extra");
 
+const minimal_args = [
+  '--autoplay-policy=user-gesture-required',
+  '--disable-background-networking',
+  '--disable-background-timer-throttling',
+  '--disable-backgrounding-occluded-windows',
+  '--disable-breakpad',
+  '--disable-client-side-phishing-detection',
+  '--disable-component-update',
+  '--disable-default-apps',
+  '--disable-dev-shm-usage',
+  '--disable-domain-reliability',
+  '--disable-extensions',
+  '--disable-features=AudioServiceOutOfProcess',
+  '--disable-hang-monitor',
+  '--disable-ipc-flooding-protection',
+  '--disable-notifications',
+  '--disable-offer-store-unmasked-wallet-cards',
+  '--disable-popup-blocking',
+  '--disable-print-preview',
+  '--disable-prompt-on-repost',
+  '--disable-renderer-backgrounding',
+  '--disable-setuid-sandbox',
+  '--disable-speech-api',
+  '--disable-sync',
+  '--hide-scrollbars',
+  '--ignore-gpu-blacklist',
+  '--metrics-recording-only',
+  '--mute-audio',
+  '--no-default-browser-check',
+  '--no-first-run',
+  '--no-pings',
+  '--no-sandbox',
+  '--no-zygote',
+  '--password-store=basic',
+  '--use-gl=swiftshader',
+  '--use-mock-keychain',
+];
+
 // Add stealth plugin and use defaults (all tricks to hide puppeteer usage)
 const StealthPlugin = require("puppeteer-extra-plugin-stealth");
 puppeteer.use(StealthPlugin());
@@ -103,9 +141,10 @@ async function openBrowser() {
   try {
     return await puppeteer.launch({
       ignoredHTTPSErrors: true,
-      args: ["--no-sandbox"],
-      headless: true,
+      args: minimal_args,
+      headless: false,
       timeout: 0,
+      userDataDir: './my/path'
     });
   } catch (error) {
     console.log(`error has occured in openBrowser`);
@@ -127,7 +166,7 @@ async function searchActionByName(page, value) {
     });
 
     await page.click("#quoteSearch");
-    await page.type("#quoteSearch", value, { delay: 700 });
+    await page.type("#quoteSearch", value, { delay: 320 });
     await page.waitForSelector(".ac_results  .ac_over", {
       visible: true,
     });
@@ -140,6 +179,7 @@ async function getActionName(page) {
   try {
     await page.waitForSelector(".securityName", {
       visible: true,
+      timeout: 0,
     });
 
     return page.evaluate(
