@@ -144,7 +144,6 @@ async function openBrowser() {
       args: minimal_args,
       headless: false,
       timeout: 0,
-      userDataDir: './my/path'
     });
   } catch (error) {
     console.log(`error has occured in openBrowser`);
