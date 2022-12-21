@@ -134,7 +134,7 @@ async function openBrowser() {
     return await puppeteer.launch({
       ignoredHTTPSErrors: true,
       args: minimal_args,
-      headless: false,
+      headless: true,
       timeout: 0,
     });
   } catch (error) {
