@@ -49,7 +49,7 @@ puppeteer.use(AdblockerPlugin({ blockTrackers: true }));
 
 async function goToPage(url, page) {
   try {
-    await page.goto(url, { waitUntil: "networkidle2", timeout: 0 });
+    await page.goto(url, { waitUntil: "domcontentloaded", timeout: 0 });
   } catch (error) {
     throw error
   }
@@ -60,16 +60,17 @@ async function acceptCookies(page) {
     // is existing individual input
     const existingIndividualInput = await page.waitForSelector(
       "#btn_individual",
-      {
-        visible: true,
-      }
+    
     );
   
     if (existingIndividualInput) {
       return page.click("#btn_individual");
     }
+    return true
   } catch (error) {
-    throw error
+    return true
+    console.log('error, acceptCookies')
+    // throw error
   }
 }
 
@@ -78,21 +79,14 @@ async function getTableData(page, tabLink) {
     await page.waitForSelector(`#${tabLink}`, {
       visible: true,
     });
-    console.log("1");
     const tab = await page.$(`#${tabLink}`);
     await page.evaluate((el) => el.click(), tab);
-    console.log("2");
-
     await page.waitForSelector("table.years5", {
       visible: true,
     });
-    console.log("3");
-
     const years = await page.$$eval("table.years5 > thead > tr > th", (ths) => {
       return ths.map((th) => th.textContent);
     });
-    console.log("4");
-
     const treatedYears = _.uniq(years);
     treatedYears.shift();
     years.shift();
@@ -103,7 +97,6 @@ async function getTableData(page, tabLink) {
         return tds.map((td) => td.textContent);
       }
     );
-    console.log("5");
 
     const dataTds = await page.$$eval("table.years5 tbody td", (tds) => {
       return tds.map((td) => {
@@ -116,7 +109,6 @@ async function getTableData(page, tabLink) {
         return td.textContent;
       });
     });
-    console.log("6");
 
     const dataByTableRow = _.chunk(dataTds, treatedYears.length);
 
@@ -174,16 +166,23 @@ async function searchActionByName(page, value) {
     console.log(`error has occured in searchActionByName`, error);
   }
 }
-async function getActionName(page) {
+async function getActionName(page, cache, companyName) {
   try {
+    const cacheKeyName = `name${companyName}`
+    const cacheData = await cache.get(cacheKeyName)
+    if(cacheData) {
+      return cacheData
+    } 
     await page.waitForSelector(".securityName", {
       visible: true,
       timeout: 0,
     });
-
-    return page.evaluate(
+    
+    const name = page.evaluate(
       () => document.querySelector(".securityName").innerText
-    );
+      );
+    cache.set(cacheKeyName, name)
+    return name
   } catch (error) {
     console.log(`error has occured in getActionName`, error);
     throw error;
@@ -191,37 +190,46 @@ async function getActionName(page) {
 }
 
 async function getActionPrice(page) {
+  console.time("getActionPrice");
   try {
     await page.waitForSelector(".price", {
       visible: true,
       timeout: 0,
     });
-    return page.evaluate(() => document.querySelector("span.price").innerText);
+    const result = page.evaluate(() => document.querySelector("span.price").innerText);
+    console.timeEnd("getActionPrice");
+    return result
   } catch (error) {
     console.log(`error has occured in getActionPrice`, error);
     throw error;
   }
 }
 async function getActionVolume(page) {
+  console.time("getActionVolume");
   try {
     await page.waitForSelector("#Col0DayVolume", {
       visible: true,
       timeout: 0,
     });
-    return page.evaluate(
+    const result = page.evaluate(
       () => document.querySelector("#Col0DayVolume").innerText
     );
+    console.timeEnd("getActionVolume");
+    return result
   } catch (error) {
     console.log(`error has occured in getActionVolume`, error);
     throw error;
   }
 }
 async function getMarketCapitalisation(page) {
+  console.time("getMarketCapitalisation");
   try {
     await page.waitForSelector("#Col0MCap", {
       visible: true,
     });
-    return page.evaluate(() => document.querySelector("#Col0MCap").innerText);
+    const result =  page.evaluate(() => document.querySelector("#Col0MCap").innerText);
+    console.timeEnd("getMarketCapitalisation");
+    return result
   } catch (error) {
     console.log(`error has occured in getMarketCapitalisation`, error);
     throw error;
@@ -400,12 +408,13 @@ async function getProfit(page) {
 
 async function getIncomeStatement(page, cache, companyName) {
   try {
-    const cacheResult = cache.get(`${companyName}IncomeStatement`);
-    if (cacheResult) {
-      return cacheResult;
-    }
+    const cacheKeyName = `IncomeStatement${companyName}`
+    const cacheData = await cache.get(cacheKeyName)
+    if(cacheData) {
+      return cacheData
+    } 
     const result = await getTableData(page, "LnkPage10");
-    cache.set(`${companyName}IncomeStatement`, result);
+    cache.set(cacheKeyName, result);
     return result;
   } catch (error) {
     console.log(`error has occured in getIncomeStatement`, error);
@@ -415,12 +424,13 @@ async function getIncomeStatement(page, cache, companyName) {
 
 async function getBalanceSheet(page, cache, companyName) {
   try {
-    const cacheResult = cache.get(`${companyName}BalanceSheet`);
-    if (cacheResult) {
-      return cacheResult;
-    }
+    const cacheKeyName = `BalanceSheet${companyName}`
+    const cacheData = await cache.get(cacheKeyName)
+    if(cacheData) {
+      return cacheData
+    } 
     const result = await getTableData(page, "LnkPage10Viewbs");
-    cache.set(`${companyName}BalanceSheet`, result);
+    cache.set(cacheKeyName, result);
     return result;
   } catch (error) {
     console.log(`error has occured in getBalanceSheet`, error);
@@ -430,12 +440,14 @@ async function getBalanceSheet(page, cache, companyName) {
 
 async function getCashFlow(page, cache, companyName) {
   try {
-    const cacheResult = cache.get(`${companyName}CashFlow`);
-    if (cacheResult) {
-      return cacheResult;
-    }
+    const cacheKeyName = `CashFlow${companyName}`
+    const cacheData = await cache.get(cacheKeyName)
+    if(cacheData) {
+      return cacheData
+    } 
+   
     const result = await getTableData(page, "LnkPage10Viewcf");
-    cache.set(`${companyName}CashFlow`, result);
+    cache.set(cacheKeyName, result);
     return result;
   } catch (error) {
     console.log(`error has occured in getCashFlow`, error);
@@ -499,7 +511,7 @@ function getAverage(values) {
   );
 }
 
-function getAllRatios(elements) {
+async function getAllRatios(elements, cache, companyName) {
   try {
     const {
       price,
@@ -509,6 +521,12 @@ function getAllRatios(elements) {
       balanceSheet,
       cashFlow,
     } = elements || {};
+
+    const cacheKeyName = `allRatios${companyName}`
+    const cacheData = await cache.get(cacheKeyName)
+    if(cacheData) {
+      return cacheData
+    } 
 
     const lastYear = balanceSheet["Total des passifs circulant"].length - 1;
     const growthRatesOnTurnover = getGrowthRateValues(
@@ -561,10 +579,10 @@ function getAllRatios(elements) {
     const equityRatio =
       balanceSheet["Total des capitaux propres"][lastYear] /
       balanceSheet["Total de l'actif"][lastYear];
-    const per =
-      Number(parseFloat(price?.replaceAll(",", ".")).toFixed(2)) /
-      incomeStatement["Dilué"][incomeStatement["Dilué"].length - 1];
-    const peg = per / (growthRatesOnResults.average * 100);
+    // const per =
+    //   Number(parseFloat(price?.replaceAll(",", ".")).toFixed(2)) /
+    //   incomeStatement["Dilué"][incomeStatement["Dilué"].length - 1];
+    // const peg = per / (growthRatesOnResults.average * 100);
     const ltDebtsOnAssetRate =
       balanceSheet["Dettes à long terme"][lastYear] /
       balanceSheet["Total de l'actif"][lastYear];
@@ -617,7 +635,7 @@ function getAllRatios(elements) {
         "Flux nets de trésorerie utilisés pour les activités d'investissement"
       ][lastYear] / incomeStatement["Résultat net"][lastYear];
 
-    return {
+    const result = {
       turnoverAverage,
       resultsAverage,
       equityAverage,
@@ -633,8 +651,8 @@ function getAllRatios(elements) {
       roeRates,
       roaRates,
       roceRates,
-      per,
-      peg,
+      // per,
+      // peg,
       ltDebtsOnAssetRate,
       ltDebtsOnResultRate,
       debts,
@@ -648,6 +666,9 @@ function getAllRatios(elements) {
       cashFlowProvidedByExploitationOnTurnoverRate,
       cashFlowProvidedByInvestmentOnResultsRate,
     };
+
+    cache.set(cacheKeyName, result)
+    return result
   } catch (error) {
     console.log(`error has occured in getAllRatios`, error);
     throw error;
@@ -655,12 +676,13 @@ function getAllRatios(elements) {
 }
 async function getKeyRatios(page, cache, companyName) {
   try {
-    const cacheResult = cache.get(`${companyName}getKeyRatios`);
-
-    if (!cacheResult) {
+    const cacheKeyName = `keyRatios${companyName}`
+    const cacheData = await cache.get(cacheKeyName)
+    if(cacheData) {
+      return cacheData
+    } 
       await page.waitForSelector("#LnkPage11", {
-        visible: true,
-      });
+        visible: true})
       await page.click("#LnkPage11");
       const growRates = await getGrowthRates(page);
       const cashFlow = await getCashFlowRatio(page);
@@ -672,10 +694,8 @@ async function getKeyRatios(page, cache, companyName) {
         profits,
         financialHealth,
       };
-      cache.set(`${companyName}getKeyRatios`, keyRatios);
+      cache.set(cacheKeyName, keyRatios);
       return keyRatios;
-    }
-    return cacheResult;
   } catch (error) {
     console.log(`error has occured in getKeyRatios`, error);
     throw error;
