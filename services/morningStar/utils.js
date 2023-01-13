@@ -136,7 +136,7 @@ async function openBrowser() {
     return await puppeteer.launch({
       ignoredHTTPSErrors: true,
       args: minimal_args,
-      headless: true,
+      headless: false,
       timeout: 0,
     });
   } catch (error) {
@@ -159,7 +159,7 @@ async function searchActionByName(page, value) {
     });
 
     await page.click("#quoteSearch");
-    await page.type("#quoteSearch", value, { delay: 320 });
+    await page.type("#quoteSearch", value, { delay: 400 });
     await page.waitForSelector(".ac_results  .ac_over", {
       visible: true,
     });
