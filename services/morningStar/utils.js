@@ -59,7 +59,9 @@ async function acceptCookies(page) {
   try {
     // is existing individual input
     const existingIndividualInput = await page.waitForSelector(
-      "#btn_individual",
+      "#btn_individual", {
+        visible:true
+      }
     
     );
   
